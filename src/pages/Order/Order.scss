@@ -1,0 +1,332 @@
+// homepage.scss
+
+// --- Variables (Ensure these are consistent with your theme) ---
+$primary-color-start: #ffbc36;
+$primary-color-end: #e08f00;
+$primary-gradient: linear-gradient(135deg, $primary-color-start 0%, $primary-color-end 100%);
+$secondary-color: #5f6368; // Google-like grey for text
+$light-text-color: #ffffff;
+$dark-text-color: #202124; // Google-like dark grey
+$background-light: #f8f9fa; // Google-like light background
+$background-page: #ffffff;
+$font-family-main: 'Google Sans', 'Roboto', 'Arial', sans-serif; // Using Google Sans if available
+$font-family-headings: 'Google Sans Display', 'Montserrat', 'Arial', sans-serif;
+$watermark-url: '/assets/icons/watermark.svg';
+$border-radius-main: 12px;
+$card-shadow-light: 0 2px 4px rgba(0,0,0,0.06), 0 2px 10px rgba(0,0,0,0.04);
+$card-shadow-hover: 0 5px 15px rgba(0,0,0,0.1), 0 3px 8px rgba(0,0,0,0.06);
+
+// --- Mixins ---
+@mixin subtle-watermark($opacity: 0.015, $z-index: -1, $filter: grayscale(100%) contrast(0.5) brightness(1.5)) {
+  content: '';
+  position: absolute;
+  top: 0; bottom: 0; left: 0; right: 0;
+  background: url($watermark-url) no-repeat center center / cover;
+  opacity: $opacity;
+  z-index: $z-index;
+  pointer-events: none;
+  filter: $filter;
+}
+
+@mixin card-style {
+  background-color: $light-text-color;
+  border-radius: $border-radius-main;
+  box-shadow: $card-shadow-light;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: $card-shadow-hover;
+  }
+}
+
+@mixin section-padding {
+  padding: 2.5rem 1rem;
+  @media (min-width: 768px) { padding: 3.5rem 1.5rem; }
+  @media (min-width: 1024px) { padding: 4rem 2rem; }
+}
+
+// --- Base CTA Button ---
+.cta-button {
+  padding: 0.75rem 1.75rem; font-size: 0.95rem; font-weight: 500; 
+  font-family: $font-family-main;
+  border-radius: 25px; cursor: pointer; transition: all 0.2s ease-out;
+  text-decoration: none; display: inline-flex; align-items: center; justify-content: center;
+  border: 1px solid transparent;
+  text-transform: none; 
+  letter-spacing: 0.1px;
+  min-width: 160px;
+  line-height: 1.5;
+
+  &.primary { 
+    background: $primary-gradient; color: $light-text-color;
+    border-color: $primary-color-end; 
+    &:hover { 
+        box-shadow: 0 2px 4px rgba(0,0,0,0.15), 0 1px 2px rgba(0,0,0,0.1);
+        filter: brightness(1.05);
+    }
+  }
+}
+
+// --- Homepage Container ---
+.homepage-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: $background-page;
+  font-family: $font-family-main;
+  position: relative;
+
+  &::before { 
+    @include subtle-watermark($opacity: 0.02, $z-index: -1);
+  }
+}
+
+// --- Homepage Header ---
+.homepage-header {
+  padding: 2rem 1rem 1.5rem;
+  text-align: center;
+  background: $primary-gradient; 
+  color: $light-text-color;
+  border-bottom-left-radius: 20px; 
+  border-bottom-right-radius: 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  margin-bottom: 1.5rem; 
+
+  .homepage-logo {
+    width: 120px; 
+    max-width: 70%;
+    height: auto;
+    margin: 0 auto 0.75rem auto;
+    @media (min-width: 768px) { width: 150px; }
+  }
+
+  .homepage-main-title {
+    font-family: $font-family-headings;
+    font-size: 2rem;
+    font-weight: 500; 
+    margin-bottom: 0.25rem;
+    @media (min-width: 768px) { font-size: 2.5rem; }
+  }
+
+  .homepage-main-subtitle {
+    font-size: 1rem;
+    opacity: 0.85;
+    font-weight: 400;
+    @media (min-width: 768px) { font-size: 1.15rem; }
+  }
+}
+
+// --- Tabs Navigation ---
+.tabs-navigation-wrapper {
+    display: flex;
+    justify-content: center;
+    padding: 0 1rem; 
+    margin-bottom: 2rem;
+}
+.tabs-navigation {
+  display: flex;
+  justify-content: center;
+  background-color: lighten($background-light, 2%);
+  border-radius: 30px; 
+  padding: 0.3rem;
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);
+  width: fit-content; 
+
+  .tab-button {
+    padding: 0.65rem 1.25rem;
+    font-family: $font-family-main; 
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: $secondary-color;
+    background-color: transparent;
+    border: none;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.65rem; // Increased gap for icons
+    margin: 0 0.2rem; 
+
+    .tab-button-img-icon { // For your existing ScanIcon.png
+        width: 20px; // Adjust size as needed
+        height: 20px;
+        object-fit: contain;
+    }
+    .tab-button-react-icon { // For react-icons
+        font-size: 1.1em; // Adjust size relative to text
+        line-height: 1;
+    }
+
+    &:hover {
+      background-color: darken($background-light, 3%);
+      color: $primary-color-end;
+    }
+
+    &.active {
+      background: $primary-gradient;
+      color: $light-text-color;
+      box-shadow: 0 1px 3px rgba($primary-color-start, 0.2);
+      font-weight: 500;
+      .tab-button-img-icon { // If you want to change img icon color on active
+        filter: brightness(0) invert(1); // Example: make it white
+      }
+      .tab-button-react-icon {
+        color: $light-text-color; // Ensure react-icon is also light
+      }
+    }
+
+    @media (min-width: 768px) {
+      padding: 0.75rem 1.5rem;
+      font-size: 0.95rem;
+    }
+  }
+}
+
+// --- Tab Content Area ---
+.tab-content-area {
+  flex-grow: 1;
+  padding: 0 1rem 2rem 1rem; 
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.animated-tab {
+    animation: fadeInTab 0.5s ease-out;
+}
+@keyframes fadeInTab {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+// --- Scan Tab Specific Content ---
+.scan-tab-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 2rem 1.5rem;
+  background-color: $light-text-color;
+  border-radius: $border-radius-main;
+  @include card-style; 
+  margin: 0 auto; 
+  max-width: 550px; 
+
+  .scan-visual {
+    position: relative;
+    margin-bottom: 1.5rem;
+    .scan-tab-image {
+        width: 120px;
+        height: auto;
+        @media (min-width: 768px) { width: 150px; }
+    }
+    .qr-code-placeholder { 
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) scale(0.8);
+        opacity: 0.3;
+        svg {
+            border: 5px solid $dark-text-color;
+            padding: 5px;
+            background: $light-text-color;
+        }
+    }
+  }
+
+  .scan-tab-title {
+    font-family: $font-family-headings;
+    font-size: 1.6rem;
+    color: $primary-color-end;
+    margin-bottom: 0.75rem;
+  }
+
+  .scan-tab-description {
+    font-size: 1rem;
+    color: $secondary-color;
+    line-height: 1.6;
+    margin-bottom: 2rem;
+  }
+
+  .scan-now-button { 
+    min-width: 200px;
+  }
+}
+
+// --- Takeaway Tab Specific Content ---
+.takeaway-tab-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem; 
+
+  .takeaway-tab-title {
+    font-family: $font-family-headings;
+    font-size: 1.6rem;
+    color: $dark-text-color;
+    text-align: center;
+    margin-bottom: 0rem; 
+  }
+  .takeaway-tab-description {
+    font-size: 1rem;
+    color: $secondary-color;
+    text-align: center;
+    margin-bottom: 1rem; 
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
+// --- Desktop Only Promotional Section ---
+.app-features-promo.desktop-only { 
+  display: none; 
+
+  @media (min-width: 992px) { 
+    display: block; 
+    @include section-padding; 
+    background-color: $background-light;
+    position: relative;
+    &::before { @include subtle-watermark($opacity: 0.02); }
+
+    .section-title { 
+        position: relative; z-index: 1;
+    }
+
+    .promo-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 2rem;
+        max-width: 1100px;
+        margin: 2rem auto 0 auto;
+        position: relative; z-index: 1;
+    }
+
+    .promo-item {
+      @include card-style;
+      padding: 1.5rem;
+      text-align: center;
+      
+      .promo-icon {
+        font-size: 2.5rem; 
+        color: $primary-color-end;
+        margin-bottom: 1rem;
+        // For react-icons, ensure they inherit color or set explicitly
+        svg { 
+            display: inline-block; // Helps with alignment
+        }
+      }
+      h3 {
+        font-family: $font-family-headings;
+        font-size: 1.3rem;
+        color: $dark-text-color;
+        margin-bottom: 0.5rem;
+      }
+      p {
+        font-size: 0.9rem;
+        color: $secondary-color;
+        line-height: 1.5;
+      }
+    }
+  }
+}

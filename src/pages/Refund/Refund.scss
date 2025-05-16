@@ -1,0 +1,170 @@
+// refund.scss
+
+// --- Import or Define Variables & Mixins ---
+// Assuming these are available from your global scope or imported.
+$primary-color-start: #ffbc36;
+$primary-color-end: #e08f00;
+$primary-gradient: linear-gradient(98.81deg, $primary-color-start -0.82%, $primary-color-end 101.53%);
+$secondary-color: #4a4a4a; // For body text
+$light-text-color: #ffffff;
+$dark-text-color: #333333; // For headings on light backgrounds
+$background-light: #f9f9f9; // Page background
+$font-family-main: 'Roboto', 'Arial', sans-serif;
+$font-family-headings: 'Montserrat', 'Arial', sans-serif;
+$watermark-url: '/assets/icons/watermark.svg'; // Ensure this path is correct
+
+@mixin section-padding {
+  padding: 3rem 1rem; // Reduced padding for text-heavy pages
+  position: relative;
+  overflow: hidden;
+  @media (min-width: 768px) { padding: 4rem 2rem; }
+  @media (min-width: 1024px) { padding: 5rem 2rem; }
+}
+
+@mixin subtle-watermark($opacity: 0.02, $z-index: -1, $filter: brightness(0) invert(15%) sepia(20%) saturate(50%) hue-rotate(0deg)) {
+  content: '';
+  position: absolute;
+  top: 0; bottom: 0; left: 0; right: 0;
+  background: url($watermark-url) no-repeat center center / cover;
+  opacity: $opacity;
+  z-index: $z-index;
+  pointer-events: none;
+  filter: $filter;
+}
+
+// Base styles for section titles (if not globally available)
+.section-title { // This will be the main H1 for the page
+  font-family: $font-family-headings;
+  font-size: 2.2rem; font-weight: 700; color: $primary-color-end;
+  text-align: center; margin-bottom: 2rem; position: relative; z-index: 1;
+  @media (min-width: 768px) { font-size: 2.8rem; margin-bottom: 2.5rem;}
+  @media (min-width: 1024px) { font-size: 3rem; margin-bottom: 3rem;}
+}
+// --- End of base styles ---
+
+
+.RefundPage {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  font-family: $font-family-main;
+  background-color: $background-light;
+  color: $secondary-color; // Default text color for paragraphs
+
+  .refund-content-wrapper {
+    flex-grow: 1;
+    width: 100%;
+    max-width: 900px; // Optimal width for readability of long text
+    margin: 0 auto; // Center the content
+    position: relative; // For watermark
+
+    &::before {
+      @include subtle-watermark($opacity: 0.025);
+    }
+  }
+
+  .refund-header {
+    margin-bottom: 1.5rem; // Space after the main title
+    @media (min-width: 768px) {
+        margin-bottom: 2rem;
+    }
+  }
+
+  .refund-article-content {
+    position: relative; // Ensure content is above watermark
+    z-index: 1;
+    background-color: $light-text-color; // White background for the text block
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba($dark-text-color, 0.08);
+
+    @media (min-width: 768px) {
+      padding: 2.5rem;
+    }
+    @media (min-width: 1024px) {
+      padding: 3rem;
+    }
+
+    .intro-paragraph {
+        font-size: 1.05rem;
+        line-height: 1.7;
+        margin-bottom: 2rem;
+        color: $dark-text-color; // Slightly more emphasis for intro
+        text-align: left;
+    }
+
+    section {
+      margin-bottom: 2.5rem;
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+
+    h2 {
+      font-family: $font-family-headings;
+      font-size: 1.5rem; // Size for section headings (H2)
+      color: $dark-text-color;
+      font-weight: 600;
+      margin-top: 0; 
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid darken($background-light, 10%); // Subtle separator
+
+      @media (min-width: 768px) {
+        font-size: 1.75rem;
+      }
+    }
+
+    p {
+      font-size: 1rem;
+      line-height: 1.7;
+      margin-bottom: 1rem;
+      color: $secondary-color; 
+      text-align: left; // Standard text alignment
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+    
+    ul {
+        list-style-type: disc; // Standard disc bullets
+        padding-left: 20px; // Indent list items
+        margin-bottom: 1rem;
+
+        li {
+            font-size: 1rem;
+            line-height: 1.7;
+            margin-bottom: 0.75rem;
+            color: $secondary-color;
+            text-align: left;
+        }
+    }
+
+    a {
+      color: $primary-color-end;
+      text-decoration: none;
+      font-weight: 500; 
+
+      &:hover {
+        text-decoration: underline;
+        color: darken($primary-color-end, 10%);
+      }
+    }
+
+    .contact-for-issues {
+        margin-top: 2rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid darken($background-light, 10%);
+        h2 { // Make this heading consistent
+            border-bottom: none; // Remove double border if h2 already has one
+            margin-bottom: 0.75rem;
+        }
+    }
+  }
+
+  // Placeholder for the old watermark div
+  .la-costa-fixed-watermark-placeholder {
+    display: none; 
+  }
+}

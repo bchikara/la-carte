@@ -13,13 +13,7 @@ import PayIcon from '../../assets/icons/pay.png';
 import MealsIcon from '../../assets/icons/meals.png';
 import Feature1Image from '../../assets/icons/Feature 1.png';
 import Feature2Image from '../../assets/icons/Feature 2.png';
-import DownArrow from '../../assets/icons/down-arrow.svg';
-
-const howItWorksCustomerImg = "https://placehold.co/400x300/ffbc36/333333?text=Customer+Orders";
-const howItWorksRestaurantImg = "https://placehold.co/400x300/e08f00/FFFFFF?text=Restaurant+Manages";
-const testimonialUserImage1 = "https://placehold.co/80x80/cccccc/FFFFFF?text=User1";
-const testimonialUserImage2 = "https://placehold.co/80x80/cccccc/FFFFFF?text=User2";
-
+import ProfileIcon from '../../assets/icons/Profile.svg';
 
 const videoUrl = "https://b.zmtcdn.com/data/file_assets/2627bbed9d6c068e50d2aadcca11ddbb1743095810.mp4";
 
@@ -36,7 +30,7 @@ const Landingpage: React.FC = () => {
             <div className="Home">
                 {/* Section 1: Full Viewport Hero Banner with Video Background */}
                 <section className="hero-banner-section">
-                    <video className="hero-video-background" autoPlay muted loop playsInline poster="https://placehold.co/1920x1080/333333/FFFFFF?text=">
+                    <video className="hero-video-background" autoPlay muted loop playsInline poster="https://placehold.co/1920x1080/000000/000000?text=">
                         <source src={videoUrl} type="video/mp4" />
                         Your browser does not support the video tag.
                     </video>
@@ -48,8 +42,8 @@ const Landingpage: React.FC = () => {
                             Seamless Restaurant Management. Delightful Food Ordering.
                         </p>
                         <div className="hero-cta-buttons">
-                            <button className="cta-button primary" onClick={() => handleNavigation('/order')}>Order Food Now</button>
-                            <button className="cta-button secondary" onClick={() => handleNavigation('/business-info')}>Restaurant Login</button>
+                            <button className="cta-button primary" onClick={() => handleNavigation('/explore')}>Order Food Now</button>
+                            <button className="cta-button secondary" onClick={() => handleNavigation('/login')}>Restaurant Login</button>
                         </div>
                     </div>
                 </section>
@@ -65,7 +59,7 @@ const Landingpage: React.FC = () => {
                             <p className="offering-card-description">
                                 Streamline operations, manage menus, track orders, and grow your customer base with our powerful restaurant tools.
                             </p>
-                            <button className="cta-button tertiary" onClick={() => handleNavigation('/business-info')}>Explore Business Tools</button>
+                            <button className="cta-button tertiary" onClick={() => handleNavigation('/about')}>Explore Business Tools</button>
                         </div>
                         <div className="offering-card">
                             <img src={foodLogo} alt="La Carte Food Ordering" className="offering-card-icon" />
@@ -73,7 +67,7 @@ const Landingpage: React.FC = () => {
                             <p className="offering-card-description">
                                 Find your favorite local restaurants, discover new cuisines, and enjoy hassle-free online ordering and delivery.
                             </p>
-                            <button className="cta-button tertiary" onClick={() => handleNavigation('/order')}>Find Restaurants</button>
+                            <button className="cta-button tertiary" onClick={() => handleNavigation('/explore')}>Find Restaurants</button>
                         </div>
                     </div>
                 </section>
@@ -160,12 +154,12 @@ const Landingpage: React.FC = () => {
                     <h2 className="section-title light-text">What Our Users Say</h2>
                     <div className="testimonials-container">
                         <div className="testimonial-item">
-                            <img src={testimonialUserImage1} alt="Testimonial User 1" className="testimonial-image"/>
+                            <img src={ProfileIcon} alt="Testimonial User 1" className="testimonial-image"/>
                             <p className="testimonial-quote">"La Carte has transformed how we manage our orders. It's so easy to use!"</p>
                             <p className="testimonial-author">- Restaurant Owner, Food Haven</p>
                         </div>
                         <div className="testimonial-item">
-                            <img src={testimonialUserImage2} alt="Testimonial User 2" className="testimonial-image"/>
+                            <img src={ProfileIcon} alt="Testimonial User 2" className="testimonial-image"/>
                             <p className="testimonial-quote">"Ordering food is a breeze with La Carte. Love the variety and quick delivery!"</p>
                             <p className="testimonial-author">- Sarah L., Happy Customer</p>
                         </div>
@@ -195,7 +189,7 @@ const Landingpage: React.FC = () => {
                         </div>
                         <div className="app-cta-buttons">
                             <button className="cta-button primary large" onClick={() => handleNavigation('/download-app')}>Download App</button>
-                            <button className="cta-button secondary large" onClick={() => handleNavigation('/signup-vendor')}>Partner With Us</button>
+                            <button className="cta-button secondary large" onClick={() => handleNavigation('/about')}>Partner With Us</button>
                         </div>
                     </div>
                 </section>

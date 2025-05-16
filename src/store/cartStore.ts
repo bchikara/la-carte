@@ -2,11 +2,17 @@
 
 import { create } from 'zustand';
 import { CartStore, CartStateShape, CartItem } from '../types/cart.types'; // Adjust path as needed
-import * as cartService from '../services/cartService'; // Adjust path as needed
+import { Product } from '../types/restaurant.types'; // Adjust path to your restaurant types
+import * as cartService from '../services/cartService'; // Adjust path to your cartService
 
-// Helper function to calculate total items (can stay in store or move to service if preferred)
+// Helper function to calculate total number of items (sum of quantities)
 const calculateTotalItems = (cart: CartStateShape): number => {
   return Object.values(cart).reduce((acc, item) => acc + item.quantity, 0);
+};
+
+// Helper function to calculate the total monetary value of the cart
+const calculateCartTotalAmount = (cart: CartStateShape): number => {
+  return Object.values(cart).reduce((acc, item) => acc + (item.price * item.quantity), 0);
 };
 
 export const useCartStore = create<CartStore>((set, get) => ({
@@ -27,30 +33,38 @@ export const useCartStore = create<CartStore>((set, get) => ({
     });
   },
 
-  addToCart: (itemToAdd: Omit<CartItem, 'quantity'>) => {
+  addToCart: (product: Product) => { // Takes a full Product object
+    // Prevent adding if product is out of stock
+    if (product.outofstock) {
+        console.warn("Attempted to add out of stock item:", product.name);
+        // Optionally, use a snackbar to inform the user:
+        // useSnackbarStore.getState().showSnackbar(`${product.name} is out of stock.`, 'warning');
+        return; 
+    }
+
     set((state) => {
       const currentCart = { ...state.cart };
-      const existingItem = currentCart[itemToAdd.key];
-      let newQuantity = 1;
-
+      const existingItem = currentCart[product.key]; // Use product.key as the identifier
+      
       if (existingItem) {
-        newQuantity = existingItem.quantity + 1;
+        // Item already in cart, increment quantity
+        currentCart[product.key] = {
+          ...existingItem,
+          quantity: existingItem.quantity + 1,
+        };
+      } else {
+        // Item not in cart, add it as a new CartItem
+        // Map properties from Product to CartItem structure
+        currentCart[product.key] = {
+          productKey: product.key, // Store original product key
+          name: product.name,
+          price: product.price,
+          icon: product.icon, // Optional: include product icon
+          // veg: product.veg, // Optional: include veg status if needed in cart display
+          quantity: 1,
+        };
       }
-
-      // Ensure all required properties from itemToAdd are explicitly assigned
-      // before spreading to avoid issues if itemToAdd is missing optional fields.
-      const updatedCartItem: CartItem = {
-        key: itemToAdd.key,
-        name: itemToAdd.name,
-        price: itemToAdd.price,
-        image: itemToAdd.image, // Include optional fields explicitly
-        // Add any other properties from itemToAdd that are part of CartItem
-        ...itemToAdd, // Spread itemToAdd to include any other dynamic or specific properties
-        quantity: newQuantity,
-      };
-
-      currentCart[itemToAdd.key] = updatedCartItem;
-      cartService.saveCartToLocalStorage(currentCart); // Use service
+      cartService.saveCartToLocalStorage(currentCart); 
       return {
         cart: currentCart,
         totalItems: calculateTotalItems(currentCart),
@@ -58,21 +72,23 @@ export const useCartStore = create<CartStore>((set, get) => ({
     });
   },
 
-  removeFromCart: (itemKey: string) => {
+  removeFromCart: (productKey: string) => { // productKey is the original product.key
     set((state) => {
       const currentCart = { ...state.cart };
-      const existingItem = currentCart[itemKey];
+      const existingItem = currentCart[productKey];
 
       if (existingItem) {
         if (existingItem.quantity > 1) {
-          currentCart[itemKey] = {
+          // Item quantity > 1, decrement quantity
+          currentCart[productKey] = {
             ...existingItem,
             quantity: existingItem.quantity - 1,
           };
         } else {
-          delete currentCart[itemKey];
+          // Item quantity is 1, remove item from cart
+          delete currentCart[productKey];
         }
-        cartService.saveCartToLocalStorage(currentCart); // Use service
+        cartService.saveCartToLocalStorage(currentCart); 
         return {
           cart: currentCart,
           totalItems: calculateTotalItems(currentCart),
@@ -82,61 +98,46 @@ export const useCartStore = create<CartStore>((set, get) => ({
     });
   },
 
-  getCartItemQuantity: (itemKey: string): number => {
+  getCartItemQuantity: (productKey: string): number => {
     const cart = get().cart;
-    return cart[itemKey]?.quantity || 0;
+    return cart[productKey]?.quantity || 0;
   },
 
   isCartEmpty: (): boolean => {
     return Object.keys(get().cart).length === 0;
   },
 
-  deleteCartItem: (itemKey: string) => {
+  deleteCartItem: (productKey: string) => { // Removes item entirely regardless of quantity
     set((state) => {
       const currentCart = { ...state.cart };
-      if (currentCart[itemKey]) {
-        delete currentCart[itemKey];
-        cartService.saveCartToLocalStorage(currentCart); // Use service
+      if (currentCart[productKey]) {
+        delete currentCart[productKey];
+        cartService.saveCartToLocalStorage(currentCart); 
         return {
           cart: currentCart,
           totalItems: calculateTotalItems(currentCart),
         };
       }
-      return state; // No change if item not found
+      return state; 
     });
   },
 
   clearCart: () => {
     const emptyCart = {};
-    cartService.saveCartToLocalStorage(emptyCart); // Use service (or cartService.clearCartFromLocalStorage())
+    cartService.saveCartToLocalStorage(emptyCart); 
     set({
       cart: emptyCart,
       totalItems: 0,
     });
   },
+
+  getCartTotalAmount: (): number => {
+    return calculateCartTotalAmount(get().cart);
+  }
 }));
 
-// To ensure cart is loaded as soon as possible when the app starts,
-// and only on the client-side.
+// Auto-initialize cart from localStorage on client-side when the store module is first imported.
+// This ensures the cart is loaded as early as possible.
 if (typeof window !== 'undefined') {
   useCartStore.getState().initializeCart();
 }
-
-// The useEffect hook for initialization should be in your main App component or a similar
-// top-level component, not directly in the store file.
-// Example for App.tsx:
-// import { useEffect } from 'react';
-// import { useCartStore } from './path-to-your-store/cartStore';
-//
-// function App() {
-//   const initializeCart = useCartStore((state) => state.initializeCart);
-//   const isCartInitialized = useCartStore((state) => state.isCartInitialized);
-//
-//   useEffect(() => {
-//     if (!isCartInitialized) {
-//       initializeCart();
-//     }
-//   }, [isCartInitialized, initializeCart]);
-//
-//   // ... rest of your App component
-// }

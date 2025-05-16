@@ -1,0 +1,46 @@
+// src/components/Menu/flat-product-list.scss
+
+// Assuming variables like $dark-text-color, $secondary-color, $font-family-headings are available.
+$primary-color-start: #ffbc36;
+$primary-color-end: #e08f00;
+$primary-gradient: linear-gradient(135deg, $primary-color-start 0%, $primary-color-end 100%);
+$secondary-color: #5f6368;
+$light-text-color: #ffffff;
+$dark-text-color: #202124;
+$background-page: #f8f9fa; // Light background for the menu page
+$font-family-main: 'Roboto', 'Arial', sans-serif;
+$font-family-headings: 'Montserrat', 'Arial', sans-serif;
+$watermark-url: '/assets/icons/watermark.svg';
+$border-radius-main: 12px;
+$card-shadow-light: 0 2px 4px rgba(0,0,0,0.06), 0 2px 10px rgba(0,0,0,0.04);
+
+.flat-product-list-view {
+  padding-top: 1rem; // Space after search bar or title
+
+  .search-results-title {
+    font-family: $font-family-headings;
+    font-size: 1.5rem;
+    color: $dark-text-color;
+    margin-bottom: 1.5rem;
+    text-align: center;
+    font-weight: 500;
+
+    @media (min-width: 768px) {
+      font-size: 1.8rem;
+    }
+  }
+
+  .products-grid { // Same grid as in accordion for consistency
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+
+    @media (min-width: 600px) {
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    }
+    @media (min-width: 992px) {
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1.5rem;
+    }
+  }
+}

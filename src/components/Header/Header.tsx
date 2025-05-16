@@ -5,7 +5,7 @@ import LaCarteLogo from '../../assets/icons/la_carte.png'
 // Example navigation links, adjust as needed
 const navLinks = [
   { path: '/', label: 'Home' },
-  { path: '/menu', label: 'Menu' },
+  { path: '/explore', label: 'Explore' },
   { path: '/about', label: 'About Us' },
   { path: '/contact', label: 'Contact' },
 ];
@@ -39,7 +39,7 @@ const Header: React.FC = () => {
                 <div className="header-actions-desktop">
                     {/* Placeholder for desktop action buttons like Login/Cart */}
                     <button className="header-action-btn" onClick={() => handleNavigate('/login')}>Login</button>
-                    <button className="header-action-btn" onClick={() => handleNavigate('/cart')}>Cart</button>
+                    {/* <button className="header-action-btn" onClick={() => handleNavigate('/cart')}>Cart</button> */}
                 </div>
                 <div className="header-mobile-menu-icon" onClick={toggleMobileMenu}>
                     {/* Basic hamburger icon, consider using an SVG or icon library */}
@@ -54,7 +54,7 @@ const Header: React.FC = () => {
                         </div>
                     ))}
                     <div className="header-nav-link-mobile" onClick={() => handleNavigate('/login')}>Login</div>
-                    <div className="header-nav-link-mobile" onClick={() => handleNavigate('/cart')}>Cart</div>
+                    {/* <div className="header-nav-link-mobile" onClick={() => handleNavigate('/cart')}>Cart</div> */}
                 </nav>
             )}
         </header>

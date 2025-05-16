@@ -1,51 +1,55 @@
 // src/types/cart.types.ts
+import { Product } from './restaurant.types'; // Assuming Product type is in restaurant.types.ts
 
 /**
  * Interface for a single item in the cart.
- * The 'key' property from your original item seems to be its unique identifier.
+ * It's derived from a Product, but quantity is managed by the cart.
+ * 'key' from Product becomes 'productKey' in CartItem to avoid conflict if CartItem itself has a 'key'.
  */
 export interface CartItem {
-    key: string; // Unique identifier for the item
-    name: string;
-    price: number;
-    image?: string; // Optional image URL
-    // Any other properties your item might have
-    [key: string]: any; // Allow other dynamic properties if needed
-    quantity: number; // This will be managed by the cart
-  }
-  
-  /**
-   * Interface for the structure of the cart state.
-   * The cart will be an object where keys are item keys (IDs) and values are CartItem objects.
-   */
-  export interface CartStateShape {
-    [itemKey: string]: CartItem;
-  }
-  
-  /**
-   * Interface for the Zustand store's state.
-   */
-  export interface CartStoreState {
-    cart: CartStateShape;
-    totalItems: number;
-    isCartInitialized: boolean; // To track if cart has been loaded from localStorage
-  }
-  
-  /**
-   * Interface for the Zustand store's actions.
-   */
-  export interface CartStoreActions {
-    initializeCart: () => void; // Action to load cart from localStorage
-    addToCart: (item: Omit<CartItem, 'quantity'>) => void;
-    removeFromCart: (itemKey: string) => void;
-    getCartItemQuantity: (itemKey: string) => number; // This is a selector, could be outside actions
-    isCartEmpty: () => boolean; // This is a selector, could be outside actions
-    deleteCartItem: (itemKey: string) => void;
-    clearCart: () => void;
-  }
-  
-  /**
-   * Combined interface for the Zustand store (state & actions).
-   */
-  export type CartStore = CartStoreState & CartStoreActions;
-  
+  productKey: string; // Original product's key (from Product.key)
+  name: string;
+  price: number;
+  icon?: string; // Optional product image URL
+  // Add any other properties from Product that you want to store directly in the cart item
+  // For example, if 'veg' status is important for display in cart:
+  // veg?: boolean; 
+  quantity: number;
+}
+
+/**
+ * Interface for the structure of the cart state.
+ * The cart will be an object where keys are product keys (productKey) and values are CartItem objects.
+ */
+export interface CartStateShape {
+  [productKey: string]: CartItem;
+}
+
+/**
+ * Interface for the Zustand store's state.
+ */
+export interface CartStoreState {
+  cart: CartStateShape;
+  totalItems: number; // Total number of individual items (sum of quantities)
+  isCartInitialized: boolean; 
+}
+
+/**
+ * Interface for the Zustand store's actions.
+ * The item passed to addToCart will be the Product object.
+ */
+export interface CartStoreActions {
+  initializeCart: () => void; 
+  addToCart: (product: Product) => void; // Takes a Product object
+  removeFromCart: (productKey: string) => void; // Removes one instance, or item if quantity becomes 0
+  getCartItemQuantity: (productKey: string) => number; 
+  isCartEmpty: () => boolean; 
+  deleteCartItem: (productKey: string) => void; // Removes item entirely regardless of quantity
+  clearCart: () => void;
+  getCartTotalAmount: () => number; // Calculates total price of items in cart
+}
+
+/**
+ * Combined interface for the Zustand store (state & actions).
+ */
+export type CartStore = CartStoreState & CartStoreActions;

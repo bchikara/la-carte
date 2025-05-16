@@ -1,0 +1,158 @@
+// contact.scss
+
+// --- Import or Define Variables & Mixins ---
+// Assuming these are available from your global scope or imported.
+$primary-color-start: #ffbc36;
+$primary-color-end: #e08f00;
+$primary-gradient: linear-gradient(98.81deg, $primary-color-start -0.82%, $primary-color-end 101.53%);
+$secondary-color: #4a4a4a;
+$light-text-color: #ffffff;
+$dark-text-color: #333333;
+$background-light: #f9f9f9;
+$background-extralight: #fdfdfd;
+$font-family-main: 'Roboto', 'Arial', sans-serif;
+$font-family-headings: 'Montserrat', 'Arial', sans-serif;
+$watermark-url: '/assets/icons/watermark.svg'; // Ensure this path is correct
+
+@mixin section-padding {
+  padding: 4.5rem 1rem;
+  position: relative;
+  overflow: hidden;
+  @media (min-width: 768px) { padding: 6rem 2rem; }
+  @media (min-width: 1024px) { padding: 7rem 2rem; }
+}
+
+@mixin subtle-watermark($opacity: 0.02, $z-index: -1, $filter: brightness(0) invert(15%) sepia(20%) saturate(50%) hue-rotate(0deg)) {
+  content: '';
+  position: absolute;
+  top: 0; bottom: 0; left: 0; right: 0;
+  background: url($watermark-url) no-repeat center center / cover;
+  opacity: $opacity;
+  z-index: $z-index;
+  pointer-events: none;
+  filter: $filter;
+}
+
+// Base styles for section titles, subtitles (if not globally available)
+.section-title {
+  font-family: $font-family-headings;
+  font-size: 2rem; font-weight: 700; color: $primary-color-end;
+  text-align: center; margin-bottom: 0.75rem; position: relative; z-index: 1;
+  @media (min-width: 768px) { font-size: 2.5rem; }
+  @media (min-width: 1024px) { font-size: 2.8rem; }
+}
+
+.section-subtitle {
+  font-size: 1rem; color: $secondary-color; text-align: center;
+  max-width: 600px; margin: 0 auto 3rem auto; line-height: 1.6; // Increased bottom margin
+  position: relative; z-index: 1;
+  @media (min-width: 768px) { font-size: 1.1rem; margin-bottom: 4rem; }
+}
+// --- End of base styles ---
+
+
+.ContactPage {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh; // Ensure the page structure takes full height
+  font-family: $font-family-main;
+  background-color: $background-extralight; // Light background for the page
+
+  .contact-content-wrapper {
+    flex-grow: 1; // Allows this section to take available space
+    display: flex;
+    flex-direction: column;
+    align-items: center; // Center content horizontally
+    justify-content: center; // Center content vertically within its flex space
+    width: 100%;
+    max-width: 900px; // Max width for the content area
+    margin: 0 auto; // Center the wrapper itself
+    text-align: center; // Default text align for content within
+    position: relative; // For watermark
+
+    &::before {
+      @include subtle-watermark($opacity: 0.025);
+    }
+  }
+
+  .contact-details-grid {
+    display: grid;
+    grid-template-columns: 1fr; // Single column on mobile
+    gap: 2rem; // Space between contact items
+    width: 100%;
+    margin-top: 2rem; // Space after subtitle
+    position: relative; // Ensure details are above watermark
+    z-index: 1;
+
+    @media (min-width: 768px) {
+      grid-template-columns: repeat(2, 1fr); // Two columns on desktop
+      gap: 2.5rem;
+      text-align: left; // Align text to left in desktop grid items
+    }
+  }
+
+  .contact-detail-item {
+    background-color: $light-text-color;
+    padding: 1.5rem;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba($dark-text-color, 0.07);
+    display: flex;
+    align-items: flex-start; // Align icon and text block to the top
+    gap: 1rem; // Space between icon and text
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+
+    &:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 20px rgba($dark-text-color, 0.1);
+    }
+
+    @media (min-width: 768px) {
+      // For the address item to span two columns if desired
+      &.address-item {
+        grid-column: span 2; // Make address item span full width on 2-column layout
+      }
+    }
+  }
+
+  .contact-icon-wrapper {
+    flex-shrink: 0; // Prevent icon from shrinking
+    background-color: rgba($primary-color-start, 0.15);
+    color: $primary-color-end;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem; // Icon size
+  }
+
+  .contact-text-wrapper {
+    h4 {
+      font-family: $font-family-headings;
+      font-size: 1.1rem;
+      color: $dark-text-color;
+      margin-bottom: 0.35rem;
+      font-weight: 600;
+    }
+
+    span, a {
+      font-size: 1rem;
+      color: $secondary-color;
+      line-height: 1.6;
+      word-break: break-word; // Break long strings like email/GSTIN
+    }
+    a {
+        color: $primary-color-end;
+        text-decoration: none;
+        &:hover {
+            text-decoration: underline;
+        }
+    }
+  }
+
+  // Specific icon adjustments if needed (original fa-phone rotate)
+  .fa-phone {
+    // transform: rotate(90deg); // Kept if this specific rotation is desired
+  }
+}

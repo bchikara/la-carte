@@ -1,0 +1,270 @@
+// Assuming variables are available from your global scope or imported.
+$primary-color-start: #ffbc36;
+$primary-color-end: #e08f00;
+$primary-gradient: linear-gradient(98.81deg, $primary-color-start -0.82%, $primary-color-end 101.53%);
+$secondary-color: #5f6368; // For less prominent text
+$light-text-color: #ffffff;
+$dark-text-color: #202124; // For main text
+$border-color-light: #e0e0e0; // Light border for separation
+$font-family-main: 'Roboto', 'Arial', sans-serif;
+$font-family-headings: 'Montserrat', 'Arial', sans-serif;
+$border-radius-card: 12px; // Consistent card border radius
+$border-radius-button: 20px; // Rounded buttons
+
+$background-light: #f9f9f9;
+.product-card-redesigned {
+  display: flex;
+  background-color: $light-text-color;
+  border-radius: $border-radius-card;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  padding: 1rem;
+  position: relative; // For outofstock badge positioning
+  border: 1px solid $border-color-light;
+
+  &.outofstock {
+    opacity: 0.7;
+    .product-add-action button {
+      cursor: not-allowed;
+      background-color: #e0e0e0;
+      color: $secondary-color;
+      border-color: #bdbdbd;
+    }
+  }
+
+  .product-info-column {
+    flex: 1 1 60%; // Takes more space
+    display: flex;
+    flex-direction: column;
+    padding-right: 1rem; // Space between text and image column
+  }
+
+  .product-header-info {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.35rem;
+
+    .veg-indicator {
+      width: 18px;
+      height: 18px;
+      margin-right: 0.5rem;
+      flex-shrink: 0;
+      img { display: block; width: 100%; height: 100%; }
+    }
+
+    .product-name {
+      font-family: $font-family-headings;
+      font-size: 1.1rem; // Mobile
+      font-weight: 600;
+      color: $dark-text-color;
+      margin: 0;
+      line-height: 1.3;
+      @media (min-width: 768px) {
+        font-size: 1.25rem; // Desktop
+      }
+    }
+  }
+
+  .product-price {
+    font-size: 1rem; // Mobile
+    font-weight: 500;
+    color: $dark-text-color;
+    margin-bottom: 0.5rem;
+    @media (min-width: 768px) {
+        font-size: 1.1rem; // Desktop
+    }
+  }
+
+  .product-description-text {
+    font-size: 0.85rem; // Mobile
+    color: $secondary-color;
+    line-height: 1.5;
+    margin-bottom: 0.75rem;
+    flex-grow: 1; // Allow description to take available space
+
+    .read-more-btn {
+      color: $primary-color-end;
+      font-weight: 600;
+      cursor: pointer;
+      margin-left: 0.25rem;
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+     @media (min-width: 768px) {
+        font-size: 0.9rem; // Desktop
+    }
+  }
+  
+  .product-meta-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: auto; // Pushes to the bottom of the info column
+
+    .meta-action-btn {
+      background: none;
+      border: none;
+      color: $secondary-color;
+      font-size: 1.1rem; // Icon size
+      cursor: pointer;
+      padding: 0.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0.7;
+      transition: opacity 0.2s ease, color 0.2s ease;
+
+      &:hover {
+        opacity: 1;
+        color: $primary-color-end;
+      }
+      &.bookmark-btn.bookmarked svg { // Style for when bookmarked
+        color: $primary-color-start; // Example: filled bookmark color
+      }
+    }
+  }
+
+
+  .product-image-add-column {
+    flex: 0 0 110px; // Fixed width for image and button column
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between; // Pushes button to bottom of this column
+    margin-left: 0.5rem;
+
+    @media (min-width: 768px) {
+      flex: 0 0 130px; // Slightly larger on desktop
+    }
+  }
+
+  .product-image-wrapper-redesigned {
+    width: 100%;
+    aspect-ratio: 1 / 1; // Square image
+    border-radius: $border-radius-card / 1.5; // Slightly less rounded than card
+    overflow: hidden;
+    margin-bottom: 0.75rem;
+    position: relative; // For outofstock badge
+    background-color: darken($background-light, 3%);
+
+    .product-image-redesigned {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .outofstock-badge {
+        position: absolute;
+        bottom: 5px;
+        left: 50%;
+        transform: translateX(-50%);
+        background-color: rgba($dark-text-color, 0.8);
+        color: $light-text-color;
+        padding: 0.2rem 0.5rem;
+        border-radius: 4px;
+        font-size: 0.7rem;
+        font-weight: 500;
+        z-index: 2;
+        white-space: nowrap;
+    }
+  }
+
+  .product-add-action {
+    width: 100%; // Button/quantity control takes full width of its column
+    
+    .add-button-redesigned, .quantity-control-redesigned button {
+      width: 100%;
+      padding: 0.6rem 0.5rem; // Vertical padding, horizontal auto via flex
+      border-radius: $border-radius-button;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+      border: 1.5px solid $primary-color-end;
+      line-height: 1.2;
+    }
+
+    .add-button-redesigned {
+      background-color: lighten($primary-color-start, 35%); // Very light orange
+      color: $primary-color-end;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      .plus-icon {
+        margin-left: 0.35rem;
+        font-weight: 700;
+      }
+
+      &:hover:not(:disabled) {
+        background-color: lighten($primary-color-start, 25%);
+        border-color: darken($primary-color-end, 5%);
+      }
+      &.disabled {
+        border-color: #ccc;
+        background-color: #f0f0f0;
+        color: #aaa;
+      }
+    }
+
+    .quantity-control-redesigned {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border: 1.5px solid $primary-color-end;
+      border-radius: $border-radius-button;
+      overflow: hidden;
+      width: 100%;
+
+      button {
+        background-color: $light-text-color;
+        color: $primary-color-end;
+        border: none;
+        padding: 0.6rem 0.75rem; // Adjust padding for +/-
+        font-size: 1.1rem; // Make +/- slightly larger
+        flex-grow: 1; // Allow buttons to take space
+
+        &:hover {
+          background-color: lighten($primary-color-start, 38%);
+        }
+        // No internal borders needed if they are separate buttons
+      }
+      span { // Quantity number
+        padding: 0 0.5rem;
+        font-size: 1rem;
+        font-weight: 600;
+        color: $dark-text-color;
+        min-width: 20px; // Ensure space for number
+        text-align: center;
+      }
+    }
+  }
+
+  // Responsive adjustments for the overall card layout if needed
+  @media (max-width: 380px) { // Very small screens
+    padding: 0.75rem;
+    .product-info-column {
+      padding-right: 0.5rem;
+    }
+    .product-image-add-column {
+      flex: 0 0 100px;
+    }
+    .product-header-info .product-name {
+      font-size: 1rem;
+    }
+    .product-price {
+      font-size: 0.9rem;
+    }
+    .product-description-text {
+      font-size: 0.8rem;
+    }
+    .product-add-action {
+      .add-button-redesigned, .quantity-control-redesigned button {
+        font-size: 0.8rem;
+        padding: 0.5rem 0.4rem;
+      }
+      .quantity-control-redesigned span {
+        font-size: 0.9rem;
+      }
+    }
+  }
+}

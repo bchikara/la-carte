@@ -1,0 +1,220 @@
+// scanner.scss
+
+// --- Import or Define Variables & Mixins ---
+$primary-color-start: #ffbc36;
+$primary-color-end: #e08f00;
+$primary-gradient: linear-gradient(98.81deg, $primary-color-start -0.82%, $primary-color-end 101.53%);
+$secondary-color: #4a4a4a;
+$light-text-color: #ffffff;
+$dark-text-color: #333333;
+$background-light: #f9f9f9; // Page background
+$font-family-main: 'Roboto', 'Arial', sans-serif;
+$font-family-headings: 'Montserrat', 'Arial', sans-serif;
+$watermark-url: '/assets/icons/watermark.svg'; // Ensure this path is correct
+
+@mixin section-padding {
+  padding: 2rem 1rem; // Adjusted padding for a more focused scanner view
+  position: relative;
+  overflow: hidden;
+  @media (min-width: 768px) { padding: 3rem 2rem; }
+}
+
+@mixin subtle-watermark($opacity: 0.02, $z-index: -1, $filter: brightness(0) invert(15%) sepia(20%) saturate(50%) hue-rotate(0deg)) {
+  content: '';
+  position: absolute;
+  top: 0; bottom: 0; left: 0; right: 0;
+  background: url($watermark-url) no-repeat center center / cover;
+  opacity: $opacity;
+  z-index: $z-index;
+  pointer-events: none;
+  filter: $filter;
+}
+
+// Base styles for section titles, subtitles (if not globally available)
+.section-title {
+  font-family: $font-family-headings;
+  font-size: 1.8rem; font-weight: 700; color: $primary-color-end;
+  text-align: center; margin-bottom: 0.5rem; position: relative; z-index: 1;
+  @media (min-width: 768px) { font-size: 2.2rem; }
+}
+
+.section-subtitle {
+  font-size: 0.95rem; color: $secondary-color; text-align: center;
+  max-width: 500px; margin: 0 auto 2rem auto; line-height: 1.6;
+  position: relative; z-index: 1;
+  @media (min-width: 768px) { font-size: 1.05rem; margin-bottom: 2.5rem; }
+}
+// --- End of base styles ---
+
+
+.ScannerPage {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  font-family: $font-family-main;
+  background-color: $dark-text-color; // Dark background for scanner focus
+  color: $light-text-color; // Light text on dark background
+
+  .scanner-content-wrapper {
+    flex-grow: 1;
+    width: 100%;
+    max-width: 700px; // Max width for the content area
+    margin: 0 auto; // Center the content
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center; // Center content vertically
+    text-align: center;
+    position: relative;
+
+    &::before { // Watermark for dark background
+      @include subtle-watermark($opacity: 0.05, $z-index: -1, $filter: brightness(0) invert(100%));
+    }
+  }
+
+  .scanner-header {
+    margin-bottom: 1.5rem;
+    .section-title {
+        color: $primary-color-start; // Brighter title on dark bg
+    }
+    .section-subtitle {
+        color: rgba($light-text-color, 0.8);
+    }
+  }
+
+  .qr-reader-container {
+    width: 100%;
+    max-width: 320px; // Max width of the scanner view - adjusted for typical phone screens
+    aspect-ratio: 1 / 1; // Make it square
+    margin: 0 auto 1.5rem auto; // Adjusted margin
+    position: relative;
+    border-radius: 16px; // Rounded corners for the frame
+    overflow: hidden; // Clip the QrReader component to the frame
+    box-shadow: 0 0 0 5px rgba($primary-color-start, 0.5), 0 5px 25px rgba(0,0,0,0.3);
+    background-color: #111; // Fallback background for the reader area
+
+    @media (min-width: 768px) {
+        max-width: 400px; // Slightly larger for tablets/desktops
+    }
+  }
+
+  .qr-reader-frame { // This is the div with id="qr-reader-element"
+    width: 100%;
+    height: 100%;
+    position: relative;
+    background-color: #000; // Black background while camera initializes
+
+    video { // Target the video element rendered by html5-qrcode
+        width: 100% !important;
+        height: 100% !important;
+        object-fit: cover !important; // Ensures video fills the square frame, cropping if necessary
+        display: block;
+    }
+  }
+
+  .scanner-controls{
+    display: flex;flex-direction: row;
+  }
+
+  .scanner-status-message, .scanner-control-button {
+    font-size: 0.9rem;
+    color: rgba($light-text-color, 0.85);
+    margin-bottom: 1.5rem;
+    min-height: 1.2em; // Reserve space for the message
+    padding: 0.5rem 1rem;
+    background-color: rgba($light-text-color, 0.1);
+    border-radius: 20px;
+    display: inline-block; // So it doesn't take full width unless needed
+  }
+
+  .scanner-control-button{
+    margin-left: 0.25rem;
+    margin-right: 0.25rem;
+    display: flex;
+    justify-content: center;align-items: center;
+    span{
+        margin-left: 0.2rem;
+    }
+  }
+
+  .scanner-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none; 
+
+    .scanner-aiming-box {
+      width: 65%; 
+      height: 65%; 
+      border: 3px solid rgba($light-text-color, 0.6); 
+      border-radius: 12px;
+      position: relative;
+      // Optional: Add a subtle animation to the aiming box
+      // animation: pulseAimingBox 2s infinite ease-in-out;
+
+      // Corner elements for aiming box
+      // Using a simpler approach for corners that is more robust
+      &::before, &::after,
+      .corner-bottom-left::before, .corner-bottom-right::before { // Use actual elements for other corners
+        content: '';
+        position: absolute;
+        width: 30px; 
+        height: 30px;
+        border-color: $primary-color-start;
+        border-style: solid;
+      }
+      // Top-left
+      &::before { top: -3px; left: -3px; border-width: 4px 0 0 4px; border-top-left-radius: 10px;}
+      // Top-right
+      &::after { top: -3px; right: -3px; border-width: 4px 4px 0 0; border-top-right-radius: 10px;}
+      
+      // These would require adding <span class="corner-bottom-left"></span> etc. inside .scanner-aiming-box
+      // For simplicity, often just top corners or a full border is used.
+      // If you want all 4 corners distinctively styled, you'd add empty spans and target their pseudos.
+      // Example for bottom-left (requires <span class="corner-bl"></span> inside .scanner-aiming-box):
+      // .corner-bl { position: absolute; bottom: -3px; left: -3px; width: 30px; height: 30px; border-left: 4px solid $primary-color-start; border-bottom: 4px solid $primary-color-start; border-bottom-left-radius: 10px;}
+      // .corner-br { position: absolute; bottom: -3px; right: -3px; width: 30px; height: 30px; border-right: 4px solid $primary-color-start; border-bottom: 4px solid $primary-color-start; border-bottom-right-radius: 10px;}
+    }
+  }
+  
+  // Optional animation for the aiming box border or corners
+  @keyframes pulseAimingBox {
+    0% { box-shadow: 0 0 8px rgba($primary-color-start, 0.4); }
+    50% { box-shadow: 0 0 18px rgba($primary-color-start, 0.8); }
+    100% { box-shadow: 0 0 8px rgba($primary-color-start, 0.4); }
+  }
+
+
+  .scanner-tips {
+    margin-top: 1rem;
+    font-size: 0.85rem;
+    color: rgba($light-text-color, 0.7);
+    max-width: 400px;
+    text-align: left;
+    background-color: rgba($light-text-color, 0.05);
+    padding: 1rem;
+    border-radius: 8px;
+
+    strong {
+      color: rgba($light-text-color, 0.9);
+    }
+    ul {
+      list-style-type: disc;
+      padding-left: 20px;
+      margin-top: 0.5rem;
+      li {
+        margin-bottom: 0.25rem;
+      }
+    }
+  }
+
+  .la-costa-fixed-watermark-placeholder {
+    display: none;
+  }
+}

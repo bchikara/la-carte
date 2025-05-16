@@ -581,9 +581,9 @@ $watermark-url: '/assets/icons/watermark.svg'; // Define watermark path once
       width: 70px;
       height: 70px;
       border-radius: 50%;
-      object-fit: cover;
+      object-fit: contain;
       margin-bottom: 1rem;
-      border: 3px solid $primary-color-start;
+    //   border: 3px solid $primary-color-start;
     }
 
     .testimonial-quote {
@@ -729,4 +729,25 @@ $watermark-url: '/assets/icons/watermark.svg'; // Define watermark path once
 @media (min-width: 1024px) {
   // Additional refinements for larger desktops, mostly font sizes
   // These are generally applied within each section's media query block now.
+}
+
+@media (max-width:768px) {
+    .showcase-section {
+        background-color: $background-light;
+        position: relative; // For watermark
+        &::before {
+          @include subtle-watermark($opacity: 0.02);
+        }
+      
+        .showcase-image-container {
+          flex-direction: column;
+          max-width: 80%;
+          img{
+            width: 100%;
+            margin-left: 0;margin-right: 0;
+            margin-bottom: 0.5rem;
+          }
+    }
+}
+    
 }
