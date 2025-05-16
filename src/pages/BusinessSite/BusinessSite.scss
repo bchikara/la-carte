@@ -1,0 +1,427 @@
+// business-site.scss
+
+// --- Import or Define Variables & Mixins (from home.scss or a global file) ---
+$primary-color-start: #ffbc36;
+$primary-color-end: #e08f00;
+$primary-gradient: linear-gradient(98.81deg, $primary-color-start -0.82%, $primary-color-end 101.53%);
+$secondary-color: #4a4a4a;
+$light-text-color: #ffffff;
+$dark-text-color: #333333;
+$background-light: #f9f9f9;
+$background-extralight: #fdfdfd;
+$font-family-main: 'Roboto', 'Arial', sans-serif;
+$font-family-headings: 'Montserrat', 'Arial', sans-serif;
+$watermark-url: '/assets/icons/watermark.svg'; // Ensure this path is correct
+
+@mixin section-padding {
+  padding: 4.5rem 1rem; 
+  position: relative;
+  overflow: hidden; 
+  @media (min-width: 768px) { padding: 6rem 2rem; } 
+  @media (min-width: 1024px) { padding: 7rem 2rem; } 
+}
+
+@mixin centered-flex($direction: row, $justify: center, $align: center) {
+  display: flex;
+  flex-direction: $direction;
+  justify-content: $justify;
+  align-items: $align;
+}
+
+@mixin subtle-watermark($opacity: 0.03, $z-index: -2, $filter: brightness(0) invert(15%) sepia(20%) saturate(50%) hue-rotate(0deg)) {
+  content: '';
+  position: absolute;
+  top: 0; bottom: 0; left: 0; right: 0;
+  background: url($watermark-url) no-repeat center center / cover;
+  opacity: $opacity;
+  z-index: $z-index;
+  pointer-events: none;
+  filter: $filter;
+}
+
+// Base styles from home.scss for section titles, subtitles, cta-buttons
+.section-title {
+  font-family: $font-family-headings;
+  font-size: 2rem; font-weight: 700; color: $primary-color-end;
+  text-align: center; margin-bottom: 0.75rem; position: relative; z-index: 1;
+  @media (min-width: 768px) { font-size: 2.5rem; }
+  @media (min-width: 1024px) { font-size: 2.8rem; }
+  &.light-text { color: $light-text-color; }
+}
+
+.section-subtitle {
+  font-size: 1rem; color: $secondary-color; text-align: center;
+  max-width: 600px; margin: 0 auto 2.5rem auto; line-height: 1.6;
+  position: relative; z-index: 1;
+  @media (min-width: 768px) { font-size: 1.1rem; margin-bottom: 3rem; }
+  &.light-text { color: rgba($light-text-color, 0.85); }
+}
+
+.cta-button {
+  padding: 0.8rem 1.8rem; font-size: 0.9rem; font-weight: 600;
+  border-radius: 50px; cursor: pointer; transition: all 0.3s ease;
+  text-decoration: none; display: inline-block; border: 2px solid transparent;
+  text-transform: uppercase; letter-spacing: 0.5px; min-width: 180px;
+  text-align: center; position: relative; z-index: 1;
+  &.primary { 
+    background: $primary-gradient; color: $light-text-color;
+    &:hover { transform: translateY(-3px); box-shadow: 0 7px 14px rgba($primary-color-start, 0.3), 0 3px 6px rgba(0,0,0,0.08); }
+  }
+  &.secondary { 
+    background-color: transparent; color: $light-text-color; border-color: $light-text-color;
+    &:hover { background-color: $light-text-color; color: $primary-color-end; transform: translateY(-3px); box-shadow: 0 7px 14px rgba($light-text-color, 0.2), 0 3px 6px rgba(0,0,0,0.08); }
+  }
+  &.tertiary { 
+    background-color: transparent; color: $primary-color-end; border-color: $primary-color-end;
+    &:hover { background-color: $primary-color-end; color: $light-text-color; transform: translateY(-3px); box-shadow: 0 7px 14px rgba($primary-color-end, 0.2), 0 3px 6px rgba(0,0,0,0.08); }
+  }
+  &.large { padding: 1rem 2.2rem; font-size: 1rem; }
+  @media (min-width: 768px) { padding: 0.9rem 2rem; font-size: 1rem; }
+}
+// --- End of copied base styles ---
+
+
+.business-site-page {
+  font-family: $font-family-main;
+  color: $dark-text-color;
+
+  // --- Banner Section ---
+  .business-banner-section {
+    background: $primary-gradient; 
+    color: $light-text-color;
+    min-height: 100vh; 
+    @include centered-flex(column); 
+    @include section-padding;
+    text-align: center;
+
+    &::before { 
+      @include subtle-watermark($opacity: 0.1, $z-index: -1, $filter: brightness(0) invert(100%));
+    }
+    
+    .business-banner-content-wrapper {
+        @include centered-flex(column); 
+        gap: 2rem;
+        width: 100%;
+        max-width: 1100px;
+
+        @media (min-width: 992px) {
+            flex-direction: row;
+            text-align: left;
+            justify-content: space-between;
+        }
+    }
+
+    .business-banner-text {
+        z-index: 1;
+        max-width: 600px;
+        .section-title, .section-subtitle { 
+            color: $light-text-color;
+            text-align: center;
+             @media (min-width: 992px) {
+                text-align: left;
+            }
+        }
+        .section-title {
+            font-size: 2.2rem;
+            @media (min-width: 768px) { font-size: 2.8rem; }
+            @media (min-width: 1024px) { font-size: 3.2rem; }
+        }
+         .section-subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            @media (min-width: 768px) { font-size: 1.2rem; }
+        }
+        .cta-button { margin-top: 1.5rem; }
+    }
+    
+    .business-banner-image-container {
+        z-index: 1;
+        .business-banner-image {
+            max-width: 300px; 
+            width: 80%;
+            height: auto;
+            filter: drop-shadow(0px 5px 15px rgba(0,0,0,0.2));
+             @media (min-width: 768px) { max-width: 350px; }
+             @media (min-width: 992px) { max-width: 400px; }
+        }
+    }
+  }
+
+  // --- How It Works Section ---
+  .business-how-it-works-section {
+    background-color: $background-extralight;
+    min-height: 100vh;
+    @include centered-flex(column); 
+    @include section-padding;
+     &::before { @include subtle-watermark($opacity: 0.02); }
+
+    .business-work-cards-container {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+      width: 100%; 
+      max-width: 1200px;
+      margin-top: 2rem; 
+      z-index: 1; position: relative;
+
+      @media (min-width: 500px) { grid-template-columns: repeat(2, 1fr); }
+      @media (min-width: 992px) { grid-template-columns: repeat(4, 1fr); gap: 2rem; }
+    }
+
+    .work-card {
+      background-color: $light-text-color;
+      padding: 1.5rem;
+      border-radius: 10px;
+      text-align: center;
+      box-shadow: 0 5px 15px rgba($dark-text-color, 0.07);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      @include centered-flex(column, space-around); 
+      min-height: 280px; 
+
+      &:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 10px 20px rgba($dark-text-color, 0.1);
+      }
+
+      .work-card-icon {
+        width: 60px; height: 60px;
+        object-fit: contain; margin-bottom: 1rem;
+      }
+      h4 {
+        font-family: $font-family-headings; font-size: 1.2rem;
+        color: $primary-color-end; margin-bottom: 0.5rem;
+      }
+      p { font-size: 0.9rem; color: $secondary-color; line-height: 1.5; }
+    }
+  }
+
+  // --- Feature Sections (Common Styling) ---
+  .business-feature-section {
+    min-height: 100vh;
+    @include centered-flex(column); 
+    @include section-padding;
+
+    &.alt-background { background-color: $background-light; 
+        &::before { @include subtle-watermark($opacity: 0.02); }
+    }
+    &:not(.alt-background) { background-color: $light-text-color; 
+        &::before { @include subtle-watermark($opacity: 0.015, $filter: brightness(0) invert(20%) sepia(10%) saturate(30%) hue-rotate(0deg)); }
+    }
+
+    .feature-content-container {
+      @include centered-flex(column); 
+      gap: 2rem;
+      width: 100%; 
+      max-width: 1100px;
+      z-index: 1; position: relative;
+
+      @media (min-width: 768px) {
+        flex-direction: row; 
+        align-items: center; 
+        &.reverse-layout { flex-direction: row-reverse; }
+      }
+    }
+
+    .feature-image-wrapper {
+      flex: 1 1 45%; 
+      max-width: 450px; 
+      img {
+        width: 100%; height: auto;
+        border-radius: 10px;
+        box-shadow: 0 8px 20px rgba($dark-text-color, 0.1);
+        display: block; margin: 0 auto; 
+      }
+    }
+
+    .feature-text-wrapper {
+      flex: 1 1 50%; 
+      text-align: center;
+      @media (min-width: 768px) { text-align: left; }
+
+      .feature-title {
+        font-family: $font-family-headings; font-size: 1.8rem;
+        color: $primary-color-end; margin-bottom: 1rem;
+        @media (min-width: 768px) { font-size: 2.2rem; }
+      }
+      p {
+        font-size: 1rem; color: $secondary-color;
+        line-height: 1.7; margin-bottom: 1.5rem;
+      }
+      .cta-button { margin-top: 1rem; }
+    }
+  }
+
+  // --- Early Access Form Section ---
+  .business-form-section {
+    background: $primary-gradient; 
+    color: $light-text-color;
+    min-height: 100vh;
+    @include section-padding;
+    @include centered-flex(column); 
+
+     &::before { 
+      @include subtle-watermark($opacity: 0.1, $z-index: -1, $filter: brightness(0) invert(100%));
+    }
+
+    .form-content-wrapper {
+      width: 100%; 
+      max-width: 700px;
+      text-align: center;
+      background-color: rgba($dark-text-color, 0.2); 
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+      z-index: 1; position: relative;
+
+      @media (min-width: 768px) { padding: 3rem; }
+    }
+
+    .section-title, .section-subtitle { color: $light-text-color; } 
+    .section-subtitle { opacity: 0.9; margin-bottom: 2rem; }
+
+    .early-access-form {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+
+      input[type="text"], input[type="tel"], input[type="email"], textarea { // Added textarea
+        width: 100%;
+        padding: 0.9rem 1rem;
+        border-radius: 8px;
+        border: 1px solid rgba($light-text-color, 0.5);
+        background-color: rgba($light-text-color, 0.1);
+        color: $light-text-color;
+        font-size: 1rem;
+        font-family: $font-family-main; // Ensure textarea inherits font
+        transition: border-color 0.3s ease, background-color 0.3s ease;
+
+        &::placeholder { color: rgba($light-text-color, 0.6); }
+        &:focus {
+          outline: none;
+          border-color: $primary-color-start; 
+          background-color: rgba($light-text-color, 0.15);
+        }
+      }
+      textarea {
+        min-height: 80px; // Give textarea some default height
+        resize: vertical; // Allow vertical resize
+      }
+      
+      .file-upload-label {
+        display: block;
+        text-align: left;
+        font-size: 0.9rem;
+        margin-bottom: 0.25rem;
+        color: rgba($light-text-color, 0.8);
+      }
+      input[type="file"] {
+        width: 100%;
+        padding: 0.75rem;
+        border-radius: 8px;
+        border: 1px dashed rgba($light-text-color, 0.5);
+        background-color: rgba($light-text-color, 0.1);
+        color: rgba($light-text-color, 0.8);
+        cursor: pointer;
+        &::-webkit-file-upload-button { 
+            background: $primary-color-start;
+            color: $dark-text-color;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+      }
+      .file-info {
+        font-size: 0.8rem;
+        text-align: left;
+        color: rgba($light-text-color, 0.7);
+        margin-top: -0.5rem;
+      }
+
+      .cta-button { 
+        margin-top: 1.5rem; 
+        width: 100%;
+        @media (min-width: 768px) { width: auto; min-width: 220px; }
+        &:disabled {
+            background: lighten($secondary-color, 20%);
+            cursor: not-allowed;
+            &:hover {
+                transform: none;
+                box-shadow: none;
+            }
+        }
+      }
+    }
+  }
+
+  // --- FAQ Section ---
+  .business-faq-section {
+    background-color: $background-extralight;
+    min-height: 100vh;
+    @include centered-flex(column); 
+    @include section-padding;
+
+    &::before { @include subtle-watermark($opacity: 0.015); }
+
+    .faq-accordion-container {
+      width: 100%; 
+      max-width: 800px;
+      margin-top: 2rem; 
+      z-index: 1; position: relative;
+    }
+
+    .accordion-item {
+      background-color: $light-text-color;
+      border: 1px solid darken($background-light, 10%);
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      box-shadow: 0 2px 5px rgba($dark-text-color, 0.05);
+      overflow: hidden; 
+
+      &.active {
+        .accordion-arrow {
+          transform: rotate(180deg);
+        }
+      }
+    }
+
+    .accordion-tab {
+      @include centered-flex(row, space-between, center);
+      width: 100%;
+      padding: 1rem 1.25rem;
+      text-align: left;
+      font-family: $font-family-headings;
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: $dark-text-color;
+      background-color: transparent;
+      border: none;
+      cursor: pointer;
+      outline: none;
+
+      .accordion-arrow {
+        width: 18px; height: 18px;
+        transition: transform 0.3s ease;
+        filter: invert(39%) sepia(6%) saturate(16%) hue-rotate(347deg) brightness(94%) contrast(86%); 
+      }
+    }
+
+    .accordion-content {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.35s ease-out, padding 0.35s ease-out;
+      p {
+        padding: 0 1.25rem 1.25rem 1.25rem;
+        font-size: 0.95rem;
+        color: $secondary-color;
+        line-height: 1.7;
+        margin: 0;
+      }
+    }
+    .accordion-item.active .accordion-content {
+      max-height: 500px; 
+      padding-top: 0; 
+    }
+  }
+
+}

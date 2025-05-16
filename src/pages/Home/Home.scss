@@ -1,0 +1,732 @@
+// home.scss
+
+// --- Variables ---
+$primary-color-start: #ffbc36;
+$primary-color-end: #e08f00;
+$primary-gradient: linear-gradient(98.81deg, $primary-color-start -0.82%, $primary-color-end 101.53%);
+$secondary-color: #4a4a4a; // A darker grey for text and accents
+$light-text-color: #ffffff;
+$dark-text-color: #333333;
+$background-light: #f9f9f9; // For light sections
+$background-extralight: #fdfdfd; // Even lighter for subtle contrast
+$font-family-main: 'Roboto', 'Arial', sans-serif; // Example: Using Roboto
+$font-family-headings: 'Montserrat', 'Arial', sans-serif; // Example for headings
+$watermark-url: '/assets/icons/watermark.svg'; // Define watermark path once
+
+// --- Mixins (Optional, for reusability) ---
+@mixin section-padding {
+  padding: 4rem 1rem; // Mobile padding
+  position: relative; // For pseudo-elements like watermarks
+  overflow: hidden; // Contain pseudo-elements
+
+  @media (min-width: 768px) {
+    padding: 5rem 2rem; // Desktop padding
+  }
+  @media (min-width: 1024px) {
+    padding: 6rem 2rem;
+  }
+}
+
+@mixin centered-flex($direction: row, $justify: center, $align: center) {
+  display: flex;
+  flex-direction: $direction;
+  justify-content: $justify;
+  align-items: $align;
+}
+
+@mixin subtle-watermark($opacity: 0.03, $z-index: -1, $filter: brightness(0) invert(15%) sepia(20%) saturate(50%) hue-rotate(0deg)) {
+  // Inverted and desaturated for subtlety on light backgrounds
+  // For dark backgrounds, filter might be: brightness(0) invert(100%) opacity(0.05)
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: url($watermark-url) no-repeat;
+  background-position: center center;
+  background-size: cover; // Or contain, depending on the watermark image
+  opacity: $opacity;
+  z-index: $z-index;
+  pointer-events: none; // Ensure it doesn't interfere with content
+  filter: $filter;
+}
+
+
+// --- General Page Styles ---
+.Home {
+  font-family: $font-family-main;
+  color: $dark-text-color;
+  overflow-x: hidden; // Prevent horizontal scroll
+}
+
+// --- Section Base Styles ---
+.section-padding {
+  @include section-padding;
+}
+
+.section-title {
+  font-family: $font-family-headings;
+  font-size: 2rem; // Mobile
+  font-weight: 700;
+  color: $primary-color-end;
+  text-align: center;
+  margin-bottom: 0.75rem;
+  position: relative; // Ensure title is above potential watermarks
+  z-index: 1;
+
+
+  @media (min-width: 768px) {
+    font-size: 2.5rem; // Desktop
+  }
+  @media (min-width: 1024px) {
+    font-size: 2.8rem;
+  }
+
+  &.light-text {
+    color: $light-text-color;
+  }
+}
+
+.section-subtitle {
+  font-size: 1rem; // Mobile
+  color: $secondary-color;
+  text-align: center;
+  max-width: 600px;
+  margin: 0 auto 2.5rem auto; // Bottom margin for spacing
+  line-height: 1.6;
+  position: relative; // Ensure subtitle is above potential watermarks
+  z-index: 1;
+
+  @media (min-width: 768px) {
+    font-size: 1.1rem; // Desktop
+    margin-bottom: 3rem;
+  }
+
+  &.light-text {
+    color: rgba($light-text-color, 0.85);
+  }
+}
+
+// --- CTA Button Styles (Reusable) ---
+.cta-button {
+  padding: 0.8rem 1.8rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  border-radius: 50px; // Fully rounded
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  display: inline-block;
+  border: 2px solid transparent;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  min-width: 180px;
+  text-align: center;
+  position: relative; // For z-index if needed over watermarks
+  z-index: 1;
+
+  &.primary {
+    background: $primary-gradient;
+    color: $light-text-color;
+    &:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 7px 14px rgba($primary-color-start, 0.3), 0 3px 6px rgba(0, 0, 0, 0.08);
+    }
+  }
+
+  &.secondary {
+    background-color: transparent;
+    color: $light-text-color; // For use on dark backgrounds like hero
+    border-color: $light-text-color;
+    &:hover {
+      background-color: $light-text-color;
+      color: $primary-color-end;
+      transform: translateY(-3px);
+      box-shadow: 0 7px 14px rgba($light-text-color, 0.2), 0 3px 6px rgba(0, 0, 0, 0.08);
+    }
+  }
+  
+  &.tertiary { // For cards or lighter backgrounds
+    background-color: transparent;
+    color: $primary-color-end;
+    border-color: $primary-color-end;
+    &:hover {
+      background-color: $primary-color-end;
+      color: $light-text-color;
+      transform: translateY(-3px);
+      box-shadow: 0 7px 14px rgba($primary-color-end, 0.2), 0 3px 6px rgba(0, 0, 0, 0.08);
+    }
+  }
+
+  &.large {
+    padding: 1rem 2.2rem;
+    font-size: 1rem;
+  }
+
+  @media (min-width: 768px) {
+    padding: 0.9rem 2rem;
+    font-size: 1rem;
+  }
+}
+
+// --- Hero Banner Section (100vh including Header) ---
+.hero-banner-section {
+  height: 100vh;
+  position: relative;
+  @include centered-flex(column);
+  color: $light-text-color;
+  text-align: center;
+  overflow: hidden; 
+
+  .hero-video-background {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transform: translate(-50%, -50%);
+    z-index: -2; // Behind overlay
+  }
+
+  .hero-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.55); // Dark overlay for text contrast
+    z-index: -1; // Behind content, above video
+    // Optional: Add watermark to the overlay itself
+    // &::before {
+    //   @include subtle-watermark($opacity: 0.05, $z-index: -1, $filter: brightness(0) invert(100%));
+    // }
+  }
+
+  .hero-content {
+    z-index: 1; 
+    padding: 1rem;
+    max-width: 800px;
+  }
+
+  .hero-logo {
+    width: 240px; 
+    height: auto;
+    margin-bottom: 1.5rem;
+    @media (min-width: 768px) {
+      width: 150px;
+      margin-bottom: 2rem;
+    }
+  }
+
+  .hero-main-title {
+    font-family: $font-family-headings;
+    font-size: 2.5rem; 
+    font-weight: 800;
+    margin-bottom: 0.75rem;
+    line-height: 1.2;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+
+    @media (min-width: 768px) {
+      font-size: 3.5rem; 
+    }
+    @media (min-width: 1024px) {
+      font-size: 4.5rem;
+    }
+  }
+
+  .hero-main-subtitle {
+    font-size: 1.1rem; 
+    margin-bottom: 2rem;
+    line-height: 1.6;
+    opacity: 0.9;
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.2);
+
+    @media (min-width: 768px) {
+      font-size: 1.3rem; 
+      margin-bottom: 2.5rem;
+      max-width: 600px;
+    }
+  }
+
+  .hero-cta-buttons {
+    @include centered-flex;
+    gap: 1rem;
+    flex-wrap: wrap; 
+  }
+}
+
+// --- Offerings Section (Business & Food Cards) ---
+.offerings-section {
+  background-color: $background-extralight; 
+  position: relative; // For watermark
+  &::before {
+    @include subtle-watermark($opacity: 0.02);
+  }
+
+  .offerings-cards-container {
+    display: grid;
+    grid-template-columns: 1fr; 
+    gap: 2rem;
+    max-width: 1100px;
+    margin: 0 auto;
+    position: relative; // Ensure cards are above watermark
+    z-index: 1;
+
+
+    @media (min-width: 768px) {
+      grid-template-columns: 1fr 1fr; 
+      gap: 2.5rem;
+    }
+  }
+
+  .offering-card {
+    background-color: $light-text-color;
+    padding: 2rem 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 8px 25px rgba($dark-text-color, 0.08);
+    text-align: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+
+    &:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 12px 30px rgba($dark-text-color, 0.12);
+    }
+
+    .offering-card-icon {
+      width: 70px; 
+      height: 70px;
+      object-fit: contain;
+      margin-bottom: 1rem;
+      filter: drop-shadow(0 2px 3px rgba($primary-color-end, 0.3));
+
+      @media (min-width: 768px) {
+        width: 80px;
+        height: 80px;
+      }
+    }
+
+    .offering-card-title {
+      font-family: $font-family-headings;
+      font-size: 1.5rem;
+      color: $primary-color-end;
+      margin-bottom: 0.75rem;
+    }
+
+    .offering-card-description {
+      font-size: 0.95rem;
+      color: $secondary-color;
+      line-height: 1.6;
+      margin-bottom: 1.5rem;
+      min-height: 80px; 
+    }
+  }
+}
+
+// --- How It Works Section ---
+.how-it-works-section {
+  background-color: $background-light;
+  position: relative; // For watermark
+  &::before {
+    @include subtle-watermark($opacity: 0.025);
+  }
+
+  .how-it-works-container {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
+    max-width: 1000px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+
+    @media (min-width: 768px) {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  .how-it-works-column {
+    text-align: center;
+    padding: 1rem; // Inner padding for column content
+
+    .how-it-works-image {
+      width: 100%;
+      max-width: 350px;
+      height: auto;
+      border-radius: 10px;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 5px 15px rgba($dark-text-color, 0.07);
+    }
+
+    h3 {
+      font-family: $font-family-headings;
+      font-size: 1.6rem;
+      color: $primary-color-end;
+      margin-bottom: 1rem;
+    }
+
+    ol {
+      list-style: none;
+      padding-left: 0;
+      text-align: left;
+      max-width: 300px;
+      margin: 0 auto;
+
+      li {
+        font-size: 1rem;
+        color: $secondary-color;
+        margin-bottom: 0.75rem;
+        display: flex;
+        align-items: flex-start;
+
+        span {
+          font-weight: 700;
+          color: $primary-color-end;
+          margin-right: 0.75rem;
+          font-size: 1.2rem;
+          line-height: 1.4;
+        }
+      }
+    }
+  }
+}
+
+
+// --- Features Section ---
+.features-section {
+  background-color: #000000; 
+  position: relative;
+  // Watermark for dark background
+  &::before {
+    @include subtle-watermark($opacity: 0.03, $z-index: -1, $filter: brightness(0) invert(100%));
+  }
+
+  &.slanted-background {
+    // Keep this if you implement actual slanting
+  }
+
+  .features-grid {
+    display: grid;
+    grid-template-columns: 1fr; 
+    gap: 2rem;
+    max-width: 1200px;
+    margin: 0 auto 3rem auto;
+    position: relative;
+    z-index: 1;
+
+    @media (min-width: 600px) {
+      grid-template-columns: repeat(2, 1fr); 
+    }
+    @media (min-width: 992px) {
+      grid-template-columns: repeat(4, 1fr); 
+      gap: 2.5rem;
+    }
+  }
+
+  .feature-item {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 16px;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(9.6px);
+    -webkit-backdrop-filter: blur(9.6px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    padding: 1.5rem;
+    border-radius: 10px;
+    text-align: center;
+    color: rgba($light-text-color, 0.85);
+    transition: background-color 0.3s ease, transform 0.3s ease;
+
+    &:hover {
+        background-color: rgba($light-text-color, 0.1);
+        transform: translateY(-5px);
+    }
+
+    .feature-icon {
+      width: 60px;
+      height: 60px;
+      object-fit: contain;
+      margin-bottom: 1rem;
+      border-radius: 50%; 
+      background-color: $light-text-color; 
+      padding: 10px; 
+    }
+
+    h4 {
+      font-family: $font-family-headings;
+      font-size: 1.2rem;
+      color: $light-text-color;
+      margin-bottom: 0.5rem;
+    }
+    p {
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+  }
+  .features-cta { 
+    display: block;
+    margin: 2rem auto 0 auto; 
+  }
+}
+
+// --- Impact / Statistics Section ---
+.impact-section {
+  background-color: $background-extralight; 
+  position: relative; // For watermark
+  &::before {
+    @include subtle-watermark($opacity: 0.02);
+  }
+
+  .impact-stats-container {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); 
+    gap: 1.5rem;
+    max-width: 900px;
+    margin: 2rem auto 0 auto;
+    position: relative;
+    z-index: 1;
+
+    @media (min-width: 768px) {
+      grid-template-columns: repeat(4, 1fr); 
+      gap: 2rem;
+    }
+  }
+
+  .stat-item {
+    background-color: $light-text-color; 
+    padding: 1.5rem 1rem;
+    border-radius: 8px;
+    text-align: center;
+    box-shadow: 0 4px 10px rgba($dark-text-color, 0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+
+    &:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 6px 15px rgba($dark-text-color, 0.08);
+    }
+
+    .stat-number {
+      display: block;
+      font-size: 2.2rem; 
+      font-weight: 700;
+      color: $primary-color-end;
+      margin-bottom: 0.25rem;
+
+      @media (min-width: 768px) {
+        font-size: 2.8rem; 
+      }
+    }
+
+    .stat-label {
+      display: block;
+      font-size: 0.9rem; 
+      color: $secondary-color;
+      font-weight: 500;
+
+      @media (min-width: 768px) {
+        font-size: 1rem; 
+      }
+    }
+  }
+}
+
+// --- Testimonials Section ---
+.testimonials-section {
+  background-color: $secondary-color; 
+  position: relative;
+   &::before { // Watermark for dark background
+    @include subtle-watermark($opacity: 0.03, $z-index: -1, $filter: brightness(0) invert(100%));
+  }
+
+  &.slanted-background-alt {
+    // Placeholder for alternative background styling
+  }
+
+  .testimonials-container {
+    display: grid;
+    grid-template-columns: 1fr; 
+    gap: 2rem;
+    max-width: 900px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+
+    @media (min-width: 768px) {
+      grid-template-columns: 1fr 1fr; 
+      gap: 2.5rem;
+    }
+  }
+
+  .testimonial-item {
+    background-color: rgba($light-text-color, 0.1); 
+    padding: 2rem 1.5rem;
+    border-radius: 10px;
+    color: rgba($light-text-color, 0.85);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+
+    &:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 6px 15px rgba(0,0,0, 0.2);
+    }
+
+
+    .testimonial-image {
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin-bottom: 1rem;
+      border: 3px solid $primary-color-start;
+    }
+
+    .testimonial-quote {
+      font-style: italic;
+      font-size: 1rem;
+      line-height: 1.6;
+      margin-bottom: 1rem;
+      flex-grow: 1; 
+       &::before, &::after {
+        content: '"';
+        color: $primary-color-start;
+        font-size: 1.5rem;
+        font-weight: bold;
+        line-height: 0.5; // Adjust vertical alignment of quotes
+        display: inline-block;
+        margin: 0 0.2em;
+      }
+       &::before {
+         margin-right: 0.4em;
+       }
+       &::after {
+         margin-left: 0.4em;
+       }
+    }
+
+    .testimonial-author {
+      font-weight: 600;
+      font-size: 0.9rem;
+      color: $light-text-color;
+    }
+  }
+}
+
+
+// --- Showcase Section ---
+.showcase-section {
+  background-color: $background-light;
+  position: relative; // For watermark
+  &::before {
+    @include subtle-watermark($opacity: 0.02);
+  }
+
+  .showcase-image-container {
+    max-width: 50%;
+    margin: 0 auto;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba($dark-text-color, 0.1);
+    position: relative;
+    z-index: 1;
+    display: flex;
+    justify-content: center;
+    img{
+        width: 50%;
+        margin-left: 1rem;
+        margin-right: 1rem;
+    }
+  }
+  .showcase-image {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+}
+
+// --- App CTA Section ---
+.app-cta-section {
+  background: $primary-gradient; 
+  color: $light-text-color;
+  position: relative; // For potential watermark on the gradient (might be tricky)
+  // No direct watermark here as gradient is complex, but could be on overlay if needed.
+
+  .app-cta-content {
+    max-width: 800px;
+    margin: 0 auto;
+    text-align: center;
+    position: relative;
+    z-index: 1;
+
+    @media (min-width: 768px) {
+      // Could make this a flex layout on desktop if text and buttons are side-by-side
+    }
+  }
+
+  .app-cta-text {
+    margin-bottom: 2rem;
+    .section-title { 
+        color: $light-text-color;
+    }
+    .section-subtitle { 
+        color: rgba($light-text-color, 0.9);
+    }
+  }
+
+  .app-cta-buttons {
+    @include centered-flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+}
+
+// --- Desktop Responsive Styles from original home.scss (ensure these are merged correctly) ---
+// This section is for elements that were in the original `home.scss` before the new sections were added.
+// Some of these might be redundant if their selectors are now covered by the new section styles.
+// Review and merge carefully.
+
+@media (min-width: 768px) {
+  .Home { // General home padding for desktop
+    // padding: 2rem 1.5rem; // This was in original, section-padding mixin handles it now
+  }
+
+  // Styles for .business-card and .food-card if they are outside .offerings-section
+  // and need specific desktop adjustments not covered by .offering-card.
+  // If they are *always* .offering-card, these might not be needed.
+  .main-cards-container { // This was from a previous version, now .offerings-cards-container
+    // flex-direction: row;
+    // justify-content: center;
+    // align-items: stretch;
+    // gap: 2rem;
+    // max-width: 1000px;
+    // margin: 0 auto 3rem auto;
+  }
+
+  .card-item { // This was a generic card style, now more specific with .offering-card
+    // width: 45%;
+    // max-width: 450px;
+    // padding: 2rem;
+    // img { width: 120px; height: 120px; }
+    // .card-title { font-size: 1.8rem; }
+    // .card-description { font-size: 1rem; min-height: 60px; }
+    // .action-button { padding: 0.8rem 1.8rem; font-size: 1rem; }
+  }
+
+  .desktop-only-text { // This utility class is fine
+    display: block;
+  }
+
+  // .desktop-feature-highlight, .desktop-extra-section were specific sections,
+  // now replaced by .features-section, .impact-section, .testimonials-section etc.
+  // Ensure their unique content styling is merged into the new section SCSS if needed.
+}
+
+@media (min-width: 1024px) {
+  // Additional refinements for larger desktops, mostly font sizes
+  // These are generally applied within each section's media query block now.
+}

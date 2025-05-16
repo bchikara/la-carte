@@ -1,0 +1,177 @@
+// header.scss
+
+// Using variables for consistency with footer if needed
+$primary-color-start: #ffbc36;
+$primary-color-end: #e08f00;
+$text-color-light: #fff;
+$font-family-main: sans-serif; // Choose your preferred font
+
+.Header {
+  padding: 1rem 0.75rem;
+  background: transparent;
+  position: relative;
+  color: $text-color-light;
+  font-family: $font-family-main;
+  z-index: 1000; // Ensure header is above other content
+
+  &::after { // Gradient background
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(98.81deg,
+        rgba($primary-color-start, 1) -0.82%,
+        rgba($primary-color-end, 1) 101.53%);
+    z-index: -2;
+  }
+
+  &::before { // Watermark
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    // Make sure this path is correct relative to your public/assets folder or how SCSS handles assets
+    background: url('/assets/icons/watermark.svg') no-repeat; // Assuming watermark.svg is in public/assets
+    background-position: center center;
+    background-size: cover; // Or contain, depending on the watermark
+    filter: brightness(0) invert(100%);
+    opacity: 0.1; // Slightly less opaque than footer for subtlety
+    z-index: -1;
+  }
+
+  .header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1200px; // Optional: constrain width on larger screens
+    margin: 0 auto;
+    position: relative; // For z-indexing of mobile menu
+  }
+
+  .header-logo {
+    font-weight: 800;
+    font-size: 1.75rem; // Slightly larger than footer for emphasis
+    cursor: pointer;
+    user-select: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    img{
+        filter: drop-shadow(0px 8px 5px black);
+    }
+  }
+
+  .header-nav-desktop {
+    display: none; // Hidden on mobile by default
+    align-items: center;
+  }
+
+  .header-nav-link {
+    margin: 0 1rem;
+    font-weight: 500;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: color 0.2s ease-in-out;
+
+    &:hover {
+      color: darken($text-color-light, 15%);
+    }
+  }
+
+  .header-actions-desktop {
+    display: none; // Hidden on mobile by default
+    align-items: center;
+
+    .header-action-btn {
+      background-color: rgba($text-color-light, 0.2);
+      color: $text-color-light;
+      border: 1px solid rgba($text-color-light, 0.5);
+      padding: 0.5rem 1rem;
+      margin-left: 0.75rem;
+      border-radius: 20px; // Rounded buttons
+      cursor: pointer;
+      font-weight: 500;
+      transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
+
+      &:hover {
+        background-color: rgba($text-color-light, 0.3);
+        border-color: $text-color-light;
+      }
+    }
+  }
+
+  .header-mobile-menu-icon {
+    font-size: 1.75rem;
+    cursor: pointer;
+    display: block; // Visible on mobile
+  }
+
+  .header-nav-mobile {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: linear-gradient(98.81deg,
+        rgba($primary-color-start, 0.98) -0.82%, // Slightly more opaque for readability
+        rgba($primary-color-end, 0.98) 101.53%);
+    position: absolute;
+    top: 100%; // Position below the header content
+    left: 0;
+    right: 0;
+    padding: 1rem 0;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    z-index: 999; // Below header-content but above page content
+  }
+
+  .header-nav-link-mobile {
+    padding: 0.75rem 1rem;
+    font-weight: 500;
+    font-size: 1.1rem;
+    cursor: pointer;
+    width: 100%;
+    text-align: center;
+    border-bottom: 1px solid rgba($text-color-light, 0.1);
+
+    &:last-child {
+      border-bottom: none;
+    }
+
+    &:hover {
+      background-color: rgba($text-color-light, 0.1);
+    }
+  }
+
+  // Desktop styles
+  @media (min-width: 768px) {
+    padding: 1rem 1.5rem; // More padding on desktop
+
+    .header-nav-desktop {
+      display: flex;
+    }
+
+    .header-actions-desktop {
+      display: flex;
+    }
+
+    .header-mobile-menu-icon {
+      display: none; // Hide hamburger on desktop
+    }
+
+    .header-nav-mobile {
+      display: none; // Hide mobile nav on desktop
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .header-logo {
+      font-size: 2rem;
+    }
+    .header-nav-link {
+      font-size: 1.1rem;
+      margin: 0 1.25rem;
+    }
+  }
+}

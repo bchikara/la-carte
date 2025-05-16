@@ -1,0 +1,82 @@
+// src/components/Snackbar/snackbar.scss
+
+// Variables (ideally from a global file)
+$snackbar-success-bg: #4CAF50;
+$snackbar-error-bg: #f44336;
+$snackbar-warning-bg: #ff9800;
+$snackbar-info-bg: #2196F3; // Default if not specified
+$snackbar-text-color: #ffffff;
+$dark-text-color: #333; // For contrast on light severity if needed
+
+#snackbar-component.snackbar-wrapper {
+  visibility: hidden;
+  min-width: 280px;
+  max-width: 90%;
+  background-color: $snackbar-info-bg; // Default background
+  color: $snackbar-text-color;
+  text-align: center;
+  border-radius: 8px;
+  padding: 16px 20px;
+  position: fixed;
+  z-index: 1050; // High z-index to be on top
+  left: 50%;
+  bottom: 30px;
+  transform: translateX(-50%);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  font-size: 0.95rem;
+  transition: visibility 0s linear 0.5s, opacity 0.5s ease, bottom 0.5s ease; // Delay visibility hide for fadeout
+  opacity: 0;
+
+  &.show {
+    visibility: visible;
+    opacity: 1;
+    bottom: 30px; // Target position
+    transition: visibility 0s linear 0s, opacity 0.5s ease, bottom 0.5s ease;
+  }
+
+  // Severity styles
+  &.severity-success {
+    background-color: $snackbar-success-bg;
+  }
+  &.severity-error {
+    background-color: $snackbar-error-bg;
+  }
+  &.severity-warning {
+    background-color: $snackbar-warning-bg;
+    // color: $dark-text-color; // Example if text needs to be dark on warning
+  }
+  &.severity-info {
+    background-color: $snackbar-info-bg;
+  }
+
+  .snackbar-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .snackbar-message {
+    flex-grow: 1;
+  }
+
+  .snackbar-close-btn { // Optional close button
+    background: none;
+    border: none;
+    color: inherit; // Inherits text color from wrapper
+    font-size: 1.5rem;
+    line-height: 1;
+    margin-left: 15px;
+    cursor: pointer;
+    opacity: 0.8;
+    padding: 0.25rem;
+
+    &:hover {
+      opacity: 1;
+    }
+  }
+
+  @media (min-width: 768px) {
+    min-width: 320px;
+    max-width: 500px;
+  }
+}
