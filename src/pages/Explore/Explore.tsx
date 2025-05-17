@@ -1,13 +1,13 @@
 // src/pages/Homepage/Homepage.tsx
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import './Order.scss';
+import './Explore.scss';
 import Logo from '../../assets/icons/logo.png';
 import ScanIcon from '../../assets/icons/scan.png'; // Your existing ScanIcon
 import RestaurantList from '../../components/RestaurantList/RestaurantList'; // Adjust path
 import { FaShoppingBag, FaStar, FaCalendarAlt, FaCommentDots } from 'react-icons/fa';
 
-const Order: React.FC = () => {
+const Explore: React.FC = () => {
     const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState<'scan' | 'takeaway'>('scan');
 
@@ -111,6 +111,6 @@ const Order: React.FC = () => {
     );
 };
 
-export default Order;
+export default Explore;
 
 export {};

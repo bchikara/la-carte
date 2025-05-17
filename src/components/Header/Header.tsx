@@ -61,9 +61,6 @@ const Header: React.FC = () => {
                             <button className="header-action-btn profile-btn" onClick={handleProfileClick}>
                                 Profile
                             </button>
-                            <button className="header-action-btn signout-btn" onClick={handleSignOut}>
-                                Sign Out
-                            </button>
                         </>
                     ) : (
                         <button className="header-action-btn" onClick={() => handleNavigate('/login')}>
@@ -86,7 +83,6 @@ const Header: React.FC = () => {
                     {isAuthenticated ? (
                         <>
                             <div className="header-nav-link-mobile" onClick={handleProfileClick}>Profile</div>
-                            <div className="header-nav-link-mobile" onClick={handleSignOut}>Sign Out</div>
                         </>
                     ) : (
                         <div className="header-nav-link-mobile" onClick={() => handleNavigate('/login')}>Login</div>

@@ -1,22 +1,18 @@
 // src/services/userService.ts
 
-import { auth, database } from '../config/firebaseConfig'; // Removed 'storage' as it's not used in this file
-import { UserProfile, Order, UserOrders } from '../types/user.types'; // Ensure UserOrders is imported if used
-import firebase from 'firebase/compat/app'; // For firebase.database.ServerValue
+import { auth, database, storage } from '../config/firebaseConfig'; // Ensure storage is imported
+import { UserProfile, Order, UserOrdersFirebase, OrderProduct } from '../types/user.types'; 
+import firebase from 'firebase/compat/app'; 
 
 const usersRef = database.ref('/users');
+const profileImagesRef = storage.ref('profileImages'); // Base path for profile images
 
 /**
  * Gets the current Firebase authenticated user's UID.
- * Prefers the live user object, falls back to localStorage if needed (e.g., during initial load).
  */
 export const getCurrentUserId = (): string | null => {
   const currentUser = auth.currentUser;
-  if (currentUser) {
-    return currentUser.uid;
-  }
-  // Fallback, though relying on auth.onAuthStateChanged is better for live UID
-  return localStorage.getItem('uid');
+  return currentUser ? currentUser.uid : localStorage.getItem('uid');
 };
 
 /**
@@ -25,13 +21,10 @@ export const getCurrentUserId = (): string | null => {
 export const fetchUserDetailsFromDb = async (uid: string): Promise<UserProfile | null> => {
   try {
     const snapshot = await usersRef.child(uid).once('value');
-    if (snapshot.exists()) {
-      return snapshot.val() as UserProfile;
-    }
-    return null;
+    return snapshot.exists() ? { key: snapshot.key, ...snapshot.val() } as UserProfile : null;
   } catch (error) {
     console.error("Error fetching user details:", error);
-    throw error; // Re-throw to be caught by the store action
+    throw error;
   }
 };
 
@@ -41,8 +34,6 @@ export const fetchUserDetailsFromDb = async (uid: string): Promise<UserProfile |
 export const signOut = async (): Promise<void> => {
   try {
     await auth.signOut();
-    // Clearing localStorage is now primarily handled in the store's setFirebaseUser(null)
-    // but can be kept here as a defensive measure if this service is called directly elsewhere.
     localStorage.removeItem('uid');
     localStorage.removeItem('number');
   } catch (error) {
@@ -53,21 +44,22 @@ export const signOut = async (): Promise<void> => {
 
 /**
  * Adds or updates user details in Firebase Realtime Database.
- * This is typically called after user signs up or when updating profile.
+ * Typically for initial setup.
  */
 export const addUserDetailsToDb = async (uid: string, phone: string, details?: Partial<UserProfile>): Promise<void> => {
   try {
     const userProfileData: UserProfile = {
-      key: uid,
+      key: uid, 
       isAdmin: details?.isAdmin || false,
-      restaurantId: details?.restaurantId || '', // Ensure it's an empty string if not provided
+      restaurantId: details?.restaurantId || null,
       phone: phone,
-      orders: details?.orders || {},
-      displayName: auth.currentUser?.displayName || details?.displayName || null,
+      orders: details?.orders || {}, 
+      displayName: auth.currentUser?.displayName || details?.displayName || phone, // Default display name to phone if not available
       email: auth.currentUser?.email || details?.email || null,
-      ...details, // Spread last to allow overriding default/auth values
+      profileImageUrl: details?.profileImageUrl || null,
+      ...details,
     };
-    await usersRef.child(uid).update(userProfileData);
+    await usersRef.child(uid).set(userProfileData); // Use set for initial creation to ensure all base fields
   } catch (error) {
     console.error("Error adding/updating user details:", error);
     throw error;
@@ -75,9 +67,49 @@ export const addUserDetailsToDb = async (uid: string, phone: string, details?: P
 };
 
 /**
+ * Uploads a profile image for a user to Firebase Storage.
+ * @param uid - The user's ID.
+ * @param file - The image file to upload.
+ * @returns A promise that resolves to the download URL of the uploaded image.
+ */
+export const uploadProfileImage = async (uid: string, file: File): Promise<string> => {
+    try {
+        const fileRef = profileImagesRef.child(`${uid}/${file.name}_${Date.now()}`);
+        const snapshot = await fileRef.put(file);
+        const downloadURL = await snapshot.ref.getDownloadURL();
+        return downloadURL;
+    } catch (error) {
+        console.error("Error uploading profile image:", error);
+        throw error;
+    }
+};
+
+/**
+ * Updates specific fields (displayName, profileImageUrl) in the user's profile in Firebase Realtime Database.
+ * @param uid - The user's ID.
+ * @param dataToUpdate - An object containing displayName and/or profileImageUrl.
+ */
+export const updateUserProfileFieldsInDb = async (
+    uid: string, 
+    dataToUpdate: Partial<Pick<UserProfile, 'displayName' | 'profileImageUrl'>>
+): Promise<void> => {
+    try {
+        if (Object.keys(dataToUpdate).length === 0) {
+            console.warn("updateUserProfileFieldsInDb called with no data to update.");
+            return;
+        }
+        await usersRef.child(uid).update(dataToUpdate);
+    } catch (error) {
+        console.error("Error updating user profile fields:", error);
+        throw error;
+    }
+};
+
+
+/**
  * Adds a new order to a user's profile in Firebase.
  */
-export const addUserOrderToDb = async (uid: string, orderData: Omit<Order, 'orderId'>): Promise<string | null> => {
+export const addUserOrderToDb = async (uid: string, orderData: Omit<Order, 'key' | 'orderId'>): Promise<string | null> => {
   try {
     const newOrderRef = usersRef.child(uid).child('orders').push();
     const newOrderId = newOrderRef.key;
@@ -85,22 +117,22 @@ export const addUserOrderToDb = async (uid: string, orderData: Omit<Order, 'orde
     if (!newOrderId) {
       throw new Error("Failed to get new order key from Firebase.");
     }
-
-    // TypeScript error TS2739: "Type '{ orderId: string; }' is missing properties..."
-    // usually occurs here if the 'orderData' argument (type Omit<Order, 'orderId'>)
-    // being passed to this function is incomplete.
-    // Ensure that the object passed as 'orderData' from the calling code (e.g., userStore action)
-    // actually contains all required fields of an Order (like items, totalAmount, orderDate, status).
     const fullOrderData: Order = {
-        orderId: newOrderId,
-        // Set default values if not provided
-        orderDate: orderData.orderDate || firebase.database.ServerValue.TIMESTAMP,
-        status: orderData.status || 'pending',
-        // These should be required in the orderData parameter
-        items: orderData.items,
-        totalAmount: orderData.totalAmount
+      key: newOrderId, 
+      orderId: newOrderId, 
+      products: orderData.products, 
+      time: orderData.time,         
+      totalPrice: orderData.totalPrice, 
+      totalAmount: orderData.totalAmount, 
+      orderDate: orderData.orderDate, 
+      status: orderData.status || 'pending',
+      restaurantId: orderData.restaurantId, 
+      restaurantName: orderData.restaurantName,
+      table: orderData.table,
+      paymentId: orderData.paymentId,
+      paymentStatus: orderData.paymentStatus,
+      ...(orderData as Partial<Order>), 
     };
-
     await newOrderRef.set(fullOrderData);
     return newOrderId;
   } catch (error) {
@@ -110,31 +142,18 @@ export const addUserOrderToDb = async (uid: string, orderData: Omit<Order, 'orde
 };
 
 /**
- * Fetches all orders for a given user.
- * Note: For large numbers of orders, consider pagination or more specific queries.
+ * Fetches all orders for a given user from Firebase.
  */
-export const fetchUserOrdersFromDb = async (uid: string): Promise<UserOrders | null> => {
+export const fetchUserOrdersFromDb = async (uid: string): Promise<UserOrdersFirebase | null> => {
   try {
     const snapshot = await usersRef.child(uid).child('orders').once('value');
-    if (snapshot.exists()) {
-      return snapshot.val() as UserOrders;
-    }
-    return null;
+    return snapshot.exists() ? snapshot.val() as UserOrdersFirebase : null;
   } catch (error) {
     console.error("Error fetching user orders:", error);
     throw error;
   }
 };
 
-/**
- * Retrieves the user's phone number stored in localStorage.
- * This is generally a fallback; prefer getting phone from auth.currentUser.phoneNumber or UserProfile.
- */
-export const getUserPhoneNumberFromStorage = (): string | null => {
-  const value = localStorage.getItem('number');
-  if (value) {
-    // Basic cleaning, ensure it matches expected format or logic
-    return value.replace(/\D/g, '').slice(-10);
-  }
-  return null;
+export const getUserOrdersRef = (uid: string): firebase.database.Reference => {
+  return usersRef.child(uid).child('orders');
 };

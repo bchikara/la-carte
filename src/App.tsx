@@ -1,33 +1,28 @@
 // src/App.tsx
-import React, { useEffect } from 'react'; // Added React for JSX
+import React, { useEffect } from 'react';
 import { BrowserRouter, Route, Routes, Navigate } from 'react-router-dom';
 
 import Header from './components/Header/Header';
 import Footer from './components/Footer/Footer';
 import Snackbar from './components/Snackbar/Snackbar';
 
-// Page Imports
 import Home from './pages/Home/Home';
 import BusinessSite from './pages/BusinessSite/BusinessSite';
 import Contact from './pages/Contact/Contact';
 import Term from './pages/Term/Term';
 import Refund from './pages/Refund/Refund';
 import Privacy from './pages/Privacy/Privacy';
-import Order from './pages/Order/Order'; // This is the "Explore" page for restaurants
+import Order from './pages/Explore/Explore';
 import Scanner from './pages/Scanner/Scanner';
 import Menu from './pages/Menu/Menu';
 import Login from './pages/Login/Login';
-// Placeholder for ProfilePage and AdminDashboard - you'll need to create these
-// const ProfilePage = () => <div>User Profile Page (Protected)</div>; 
-// const AdminDashboard = () => <div>Admin Dashboard (Protected & Admin Only)</div>; 
-
-// Auth Route Wrappers
 import ProtectedRoute from './components/ProtectedRoute/ProtectedRoute';
 import PublicRoute from './components/PublicRoute/PublicRoute';
 
-// User Store for auth state listener initialization
 import { initializeAuthListener, cleanupAuthListener, useUserStore } from './store/userStore';
 import Cart from './pages/Cart/Cart';
+import Profile from './pages/Profile/Profile';
+import Orders from './pages/Orders/Orders';
 
 
 function App() {
@@ -73,6 +68,16 @@ function App() {
           </Route>
           <Route path="/cart/:id" element={<ProtectedRoute />}>
             <Route index element={<Cart />} />
+          </Route>
+
+
+          <Route path="/profile" element={<ProtectedRoute />}>
+            <Route index element={<Profile />} />
+          </Route>
+
+
+          <Route path="/my-orders" element={<ProtectedRoute />}>
+            <Route index element={<Orders />} />
           </Route>
          
 

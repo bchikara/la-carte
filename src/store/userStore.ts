@@ -1,37 +1,54 @@
 // src/store/userStore.ts
 
 import { create } from 'zustand';
-// Import types from the new user.types.ts file
-import { UserStore, UserProfile, Order, UserStoreActions, UserStoreState } from '../types/user.types'; 
-import { auth } from '../config/firebaseConfig'; // Adjust path as needed
-import * as userService from '../services/userService'; // Assuming userService.ts is in ../services/
-import firebase from 'firebase/compat/app'; // For firebase.User type
+import { 
+    UserStore, 
+    UserProfile, 
+    Order, 
+    UserStoreState, 
+    UserOrdersFirebase
+} from '../types/user.types'; 
+import { auth, database } from '../config/firebaseConfig'; 
+import * as userService from '../services/userService'; 
+import firebase from 'firebase/compat/app'; 
 
-// Initial state defined using the imported type
 const initialState: UserStoreState = {
   currentUser: null,
   firebaseUser: null,
   isAuthenticated: false,
-  isLoading: true, // Start as true until auth state is confirmed
+  isLoading: true, 
   error: null,
   isAdmin: null,
+  userOrders: [], 
+  isLoadingUserOrders: false,
+  errorUserOrders: null,
 };
+
+const activeStoreListeners: { userOrders?: () => void } = {};
 
 export const useUserStore = create<UserStore>((set, get) => ({
   ...initialState,
 
-  // Actions
   setFirebaseUser: (fbUser: firebase.User | null) => {
     set({ firebaseUser: fbUser, isAuthenticated: !!fbUser, isLoading: false });
     if (fbUser) {
       get().fetchUserDetails(fbUser.uid);
+      get().listenToUserOrders(); 
       localStorage.setItem('uid', fbUser.uid);
       if (fbUser.phoneNumber) {
         localStorage.setItem('number', fbUser.phoneNumber);
       }
     } else {
-      // When user signs out or auth state is null
-      set({ currentUser: null, isAdmin: null, error: null, isAuthenticated: false }); // ensure isAuthenticated is false
+      set({ 
+        currentUser: null, 
+        isAdmin: null, 
+        error: null, 
+        isAuthenticated: false, 
+        userOrders: [], 
+        isLoadingUserOrders: false, 
+        errorUserOrders: null 
+      });
+      get().stopListeningToUserOrders(); 
       localStorage.removeItem('uid');
       localStorage.removeItem('number');
     }
@@ -51,7 +68,6 @@ export const useUserStore = create<UserStore>((set, get) => ({
         isLoading: false,
       });
     } catch (err: any) {
-      console.error("Error in fetchUserDetails action:", err);
       set({ error: err.message || 'Failed to fetch user details.', isLoading: false, currentUser: null, isAdmin: null });
     }
   },
@@ -64,65 +80,132 @@ export const useUserStore = create<UserStore>((set, get) => ({
   },
 
   signOutUser: async () => {
-    set({ isLoading: true }); // Indicate loading state during sign out
+    set({ isLoading: true }); 
     try {
-      await userService.signOut(); // This service function calls firebase.auth().signOut()
-      // The onAuthStateChanged listener will then call setFirebaseUser(null),
-      // which handles clearing local state and localStorage.
-      // No need to call set({ isLoading: false }) here if setFirebaseUser handles it.
+      await userService.signOut();
     } catch (err: any) {
-      console.error("Error in signOutUser action:", err);
       set({ error: err.message || 'Sign out failed.', isLoading: false });
     }
   },
 
   addUserDetails: async (uid: string, phone: string) => {
-    set({ isLoading: true, error: null });
+    set({ isLoading: true, error: null }); 
     try {
-      // Assuming details might be more than just phone in the future for UserProfile
-      await userService.addUserDetailsToDb(uid, phone, { /* other initial details if any */ });
-      await get().fetchUserDetails(uid); // Re-fetch to ensure consistency
+      await userService.addUserDetailsToDb(uid, phone, { displayName: phone }); // Set phone as initial display name
+      await get().fetchUserDetails(uid); 
     } catch (err: any) {
-      console.error("Error in addUserDetails action:", err);
       set({ error: err.message || 'Failed to add user details.', isLoading: false });
     }
   },
 
-  addUserOrder: async (uid: string, orderData: Omit<Order, 'orderId'>) => {
+  updateUserProfile: async (uid: string, data: { displayName?: string; profileImageFile?: File }) => {
+    if (!uid) {
+        set({ error: "User not authenticated for profile update." });
+        return;
+    }
+    set({ isLoading: true, error: null });
+    try {
+        let profileImageUrl: string | undefined | null = get().currentUser?.profileImageUrl; // Keep existing if not changed
+
+        if (data.profileImageFile) {
+            profileImageUrl = await userService.uploadProfileImage(uid, data.profileImageFile);
+        }
+
+        const updates: Partial<Pick<UserProfile, 'displayName' | 'profileImageUrl'>> = {};
+        if (data.displayName !== undefined) {
+            updates.displayName = data.displayName;
+        }
+        if (profileImageUrl !== undefined) { // Check undefined, as null is a valid value to clear image
+            updates.profileImageUrl = profileImageUrl;
+        }
+        
+        if (Object.keys(updates).length > 0) {
+            await userService.updateUserProfileFieldsInDb(uid, updates);
+        }
+        
+        await get().fetchUserDetails(uid); // Re-fetch to update currentUser with all changes
+        set({ isLoading: false });
+
+    } catch (err: any) {
+        console.error("Error updating user profile:", err);
+        set({ error: err.message || 'Failed to update profile.', isLoading: false });
+    }
+  },
+
+  addUserOrder: async (uid: string, orderData: Omit<Order, 'key' | 'orderId'>) => {
     if (!uid) {
         set({ error: "User not authenticated to add order."});
         return null;
     }
-    set({ isLoading: true, error: null }); // Consider a more specific loading state if needed
     try {
       const newOrderId = await userService.addUserOrderToDb(uid, orderData);
-      // After adding an order, re-fetch user details to update the user's orders list
-      // This assumes orders are part of the UserProfile or fetched via fetchUserDetails.
-      await get().fetchUserDetails(uid); 
-      set({ isLoading: false });
       return newOrderId;
     } catch (err: any) {
-      console.error("Error in addUserOrder action:", err);
-      set({ error: err.message || 'Failed to add order.', isLoading: false });
+      set({ errorUserOrders: err.message || 'Failed to add user order.' });
       return null;
     }
   },
 
-  clearUserError: () => {
-    set({ error: null });
+  listenToUserOrders: () => {
+    const uid = get().firebaseUser?.uid;
+    if (!uid) {
+      set({ userOrders: [], isLoadingUserOrders: false, errorUserOrders: "User not authenticated to fetch orders." });
+      return;
+    }
+    get().stopListeningToUserOrders(); 
+    set({ isLoadingUserOrders: true, errorUserOrders: null });
+    const ordersRef = userService.getUserOrdersRef(uid); 
+    const listener = ordersRef.on(
+      'value',
+      (snapshot) => {
+        const rawOrders = snapshot.val() as UserOrdersFirebase | null; 
+        if (rawOrders) {
+          const processedOrders: Order[] = Object.keys(rawOrders).map(orderKey => {
+            const orderVal = rawOrders[orderKey];
+            return {
+              key: orderKey, 
+              orderId: orderKey, 
+              products: orderVal.products || {}, 
+              time: typeof orderVal.time === 'number' ? orderVal.time : (orderVal.orderDate as number || Date.now()), 
+              totalPrice: typeof orderVal.totalPrice === 'number' ? orderVal.totalPrice : (orderVal.totalAmount || 0), 
+              totalAmount: typeof orderVal.totalAmount === 'number' ? orderVal.totalAmount : 0,
+              orderDate: orderVal.orderDate, 
+              status: orderVal.status || 'pending',
+              restaurantId: orderVal.restaurantId,
+              restaurantName: orderVal.restaurantName,
+              table: orderVal.table,
+              paymentId: orderVal.paymentId,
+              paymentStatus: orderVal.paymentStatus,
+              ...orderVal, 
+            };
+          }).sort((a, b) => (b.time as number) - (a.time as number)); 
+          set({ userOrders: processedOrders, isLoadingUserOrders: false });
+        } else {
+          set({ userOrders: [], isLoadingUserOrders: false });
+        }
+      },
+      (errorObject: Error) => {
+        set({ errorUserOrders: errorObject.message, isLoadingUserOrders: false, userOrders: [] });
+      }
+    );
+    activeStoreListeners.userOrders = () => ordersRef.off('value', listener);
   },
 
-  // Implementation for cleanupAllListeners
+  stopListeningToUserOrders: () => {
+    activeStoreListeners.userOrders?.();
+    activeStoreListeners.userOrders = undefined;
+  },
+
+  clearUserError: () => {
+    set({ error: null, errorUserOrders: null });
+  },
+
   cleanupAllListeners: () => {
-    console.log("UserStore: cleanupAllListeners called. Cleaning up auth listener.");
-    cleanupAuthListener(); // Call the specific cleanup function for the auth listener
-    // If other listeners were managed by this store (e.g., in an activeListeners map),
-    // they would be cleaned up here too.
+    cleanupAuthListener(); 
+    get().stopListeningToUserOrders();
   },
 }));
 
-// --- Auth Listener Management ---
-// (This part remains the same as you provided)
 let unsubscribeFromAuthStateChanged: firebase.Unsubscribe | null = null;
 
 export const initializeAuthListener = () => {
@@ -131,27 +214,19 @@ export const initializeAuthListener = () => {
   }
   unsubscribeFromAuthStateChanged = auth.onAuthStateChanged(user => {
     useUserStore.getState().setFirebaseUser(user);
-  }, (errorObject: Error) => { // Explicitly type errorObject
-    console.error("Auth state listener error:", errorObject);
+  }, (errorObject: Error) => { 
     useUserStore.getState().setFirebaseUser(null); 
-    // Avoid setting error directly on the store from here, let setFirebaseUser handle it
-    // or dispatch a specific error action if needed.
-    // For now, setFirebaseUser(null) will clear the user state.
-    // If you want to show an auth listener error:
-    // set(state => ({ ...state, error: "Authentication listener failed."}));
   });
-  return unsubscribeFromAuthStateChanged; // Return the unsubscribe function
+  return unsubscribeFromAuthStateChanged; 
 };
 
 export const cleanupAuthListener = () => {
     if (unsubscribeFromAuthStateChanged) {
         unsubscribeFromAuthStateChanged();
-        unsubscribeFromAuthStateChanged = null; // Good practice to nullify after unsubscribing
-        console.log("UserStore: Auth listener cleaned up.");
+        unsubscribeFromAuthStateChanged = null; 
     }
 };
 
-// Automatically initialize the auth listener when the store module is loaded.
 if (typeof window !== 'undefined') { 
     initializeAuthListener();
 }

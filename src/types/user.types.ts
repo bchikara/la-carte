@@ -2,25 +2,44 @@
 import firebase from 'firebase/compat/app'; // For firebase.User type
 
 /**
- * Interface for a single Order.
- * Define the properties of an order object.
+ * Interface for a product within an order.
+ * This should align with how products are structured when an order is created/fetched.
  */
-export interface Order {
-  orderId: string; // Or some unique identifier for the order
-  items: Array<{ productId: string; quantity: number; price: number }>;
-  totalAmount: number;
-  orderDate: string; // Or Date object, consider ISO string for storage
-  status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
-  // Add any other order-specific properties
-  [key: string]: any; // Allow other dynamic properties if needed
+export interface OrderProduct {
+  productId: string; // ID of the product
+  name: string;      // Name of the product
+  quantity: number;
+  price: number;     // Price per unit at the time of order
+  veg?: boolean | string; 
+  [key: string]: any;
 }
 
 /**
- * Interface for the structure of user's orders in Firebase.
- * Orders might be stored as an object where keys are order IDs.
+ * Interface for a single Order.
  */
-export interface UserOrders {
-  [orderId: string]: Order;
+export interface Order {
+  key: string; // Firebase key of the order, now required
+  orderId: string; // Unique identifier for the order (can be same as Firebase key)
+  products: Record<string, OrderProduct>; // Products keyed by their original productKey/ID
+  time: number; // Timestamp of the order
+  totalAmount: number; // This should be the final amount paid, including any taxes at the time of order
+  totalPrice: number; // If different from totalAmount, clarify. Assuming this is the final price.
+  orderDate: string | number; // Can be ISO string or timestamp
+  status: 'pending' | 'processing' | 'confirmed' | 'shipped' | 'delivered' | 'cancelled' | 'pending_payment'; 
+  restaurantId: string;
+  restaurantName?: string;
+  table?: string; // Table number or identifier like 'Takeaway/Delivery'
+  paymentId?: string;
+  paymentStatus?: string;
+  [key: string]: any; 
+}
+
+/**
+ * Interface for the structure of user's orders as stored in Firebase.
+ * Keys are order IDs (Firebase push keys).
+ */
+export interface UserOrdersFirebase {
+  [orderId: string]: Omit<Order, 'key' | 'orderId'>; 
 }
 
 /**
@@ -29,11 +48,13 @@ export interface UserOrders {
 export interface UserProfile {
   key: string; // Corresponds to Firebase UID
   isAdmin: boolean;
-  restaurantId: string | null; // Can be null if not applicable
-  phone: string;
-  orders?: UserOrders; // Optional, as it might be loaded separately or might not exist
+  restaurantId: string | null; 
+  phone: string; // Typically not editable by user directly after verification
+  orders?: UserOrdersFirebase; 
   displayName?: string | null;
-  email?: string | null;
+  email?: string | null; // Email might also be from Firebase Auth, can be part of profile
+  profileImageUrl?: string | null; // URL for the user's profile image
+  [key: string]: any;
 }
 
 /**
@@ -41,11 +62,15 @@ export interface UserProfile {
  */
 export interface UserStoreState {
   currentUser: UserProfile | null;
-  firebaseUser: firebase.User | null; // To store the raw Firebase user object
+  firebaseUser: firebase.User | null; 
   isAuthenticated: boolean;
-  isLoading: boolean;
-  error: string | null;
-  isAdmin: boolean | null; // Derived from currentUser, but can be a quick access state
+  isLoading: boolean; 
+  error: string | null; 
+  isAdmin: boolean | null; 
+  
+  userOrders: Order[]; 
+  isLoadingUserOrders: boolean;
+  errorUserOrders: string | null;
 }
 
 /**
@@ -54,12 +79,16 @@ export interface UserStoreState {
 export interface UserStoreActions {
   setFirebaseUser: (user: firebase.User | null) => void;
   fetchUserDetails: (uid: string) => Promise<void>;
-  setUserDetails: (details: UserProfile | null) => void;
+  setUserDetails: (details: UserProfile | null) => void; // For direct setting if needed
   signOutUser: () => Promise<void>;
-  addUserDetails: (uid: string, phone: string) => Promise<void>;
-  addUserOrder: (uid: string, orderData: Omit<Order, 'orderId'>) => Promise<string | null>;
+  addUserDetails: (uid: string, phone: string) => Promise<void>; // For initial setup
+  updateUserProfile: (uid: string, data: { displayName?: string; profileImageFile?: File }) => Promise<void>; // For profile updates
+  addUserOrder: (uid: string, orderData: Omit<Order, 'key' | 'orderId'>) => Promise<string | null>; 
   clearUserError: () => void;
-  cleanupAllListeners?: () => void; // Added cleanupAllListeners
+  
+  listenToUserOrders: () => void;
+  stopListeningToUserOrders: () => void;
+  cleanupAllListeners?: () => void; 
 }
 
 /**

@@ -13,12 +13,12 @@ const ProtectedRoute: React.FC = () => {
     return <div className="auth-loading-placeholder">Verifying access...</div>;
   }
 
-//   if (!isAuthenticated) {
-//     // User not authenticated, redirect to login page
-//     // Save the current location they were trying to go to in location state
-//     // so we can send them along after they login.
-//     return <Navigate to="/login" state={{ from: location }} replace />;
-//   }
+  if (!isAuthenticated) {
+    // User not authenticated, redirect to login page
+    // Save the current location they were trying to go to in location state
+    // so we can send them along after they login.
+    return <Navigate to="/login" state={{ from: location }} replace />;
+  }
 
   return <Outlet />; // User is authenticated, render the child route elements
 };

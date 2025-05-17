@@ -1,0 +1,289 @@
+// src/pages/ProfilePage/profile-page.scss
+
+// --- Variables & Mixins (Ensure consistency with your theme) ---
+$primary-color-start: #ffbc36;
+$primary-color-end: #e08f00;
+$primary-gradient: linear-gradient(135deg, $primary-color-start 0%, $primary-color-end 100%);
+$secondary-color: #5f6368; // For labels and secondary text
+$light-text-color: #ffffff;
+$dark-text-color: #202124; // For main text and headings
+$background-page: #f8f9fa; // Light background for the page
+$border-color-light: #e0e0e0; // Subtle borders
+$font-family-main: 'Roboto', 'Arial', sans-serif;
+$font-family-headings: 'Montserrat', 'Arial', sans-serif;
+$watermark-url: '/assets/icons/watermark.svg';
+$border-radius-main: 8px; // Slightly softer radius for a modern feel
+$card-shadow: 0 4px 12px rgba(0,0,0,0.06); // Softer shadow
+$danger-color: #d9534f;
+$danger-color-hover: darken($danger-color, 10%);
+
+$background-extralight: #fdfdfd;
+
+@mixin section-padding {
+  padding: 2.5rem 1rem; // Adjusted padding
+  position: relative;
+  @media (min-width: 768px) { padding: 3.5rem 1.5rem; }
+}
+
+@mixin subtle-watermark($opacity: 0.015, $z-index: -1, $filter: grayscale(100%) contrast(0.5) brightness(1.5)) {
+  content: '';
+  position: fixed;
+  top: 0; bottom: 0; left: 0; right: 0;
+  background: url($watermark-url) no-repeat center center / cover;
+  opacity: $opacity;
+  z-index: $z-index;
+  pointer-events: none;
+  filter: $filter;
+}
+
+.section-title {
+  font-family: $font-family-headings;
+  font-size: 2rem; font-weight: 600; color: $dark-text-color; // Darker title for profile page
+  text-align: center; margin-bottom: 2.5rem; position: relative; z-index: 1;
+  @media (min-width: 768px) { font-size: 2.2rem; }
+}
+
+.cta-button { // Keep cta-button for save, but links will be styled differently
+  padding: 0.7rem 1.5rem; font-size: 0.95rem; font-weight: 500;
+  font-family: $font-family-main;
+  border-radius: 25px; cursor: pointer; transition: all 0.2s ease-out;
+  text-decoration: none; display: inline-flex; align-items: center; justify-content: center;
+  border: 1px solid transparent; text-transform: none; letter-spacing: 0.1px;
+  gap: 0.6rem; 
+  
+  svg { font-size: 1.1em; }
+
+  &.primary { 
+    background: $primary-gradient; color: $light-text-color; border-color: $primary-color-end;
+    &:hover:not(:disabled) { box-shadow: 0 2px 4px rgba(0,0,0,0.15), 0 1px 2px rgba(0,0,0,0.1); filter: brightness(1.05); }
+  }
+  // Other button types if needed
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+// --- End of Base Styles ---
+
+.ProfilePage {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: $background-page;
+  font-family: $font-family-main;
+  position: relative;
+
+  &::before { 
+    @include subtle-watermark();
+  }
+
+  &.loading-state, &.error-state {
+    @include section-padding;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    font-size: 1.2rem;
+    color: $secondary-color;
+    .spinner-icon {
+      font-size: 3rem;
+      color: $primary-color-end;
+      margin-bottom: 1rem;
+      animation: spin 1s linear infinite;
+    }
+  }
+
+  .profile-content-wrapper {
+    flex-grow: 1;
+    width: 100%;
+    max-width: 600px; // More focused content area
+    margin: 0 auto; 
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .profile-page-header { // Changed from .profile-header
+    width: 100%;
+    margin-bottom: 1rem; // Reduced space
+  }
+
+  .profile-main-content { // Replaces .profile-details-card
+    background-color: $light-text-color;
+    border-radius: $border-radius-main;
+    box-shadow: $card-shadow;
+    padding: 2rem 1.5rem;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center; // Center content within this section
+    gap: 2rem; // Space between avatar, form, and links
+
+    @media (min-width: 768px) {
+      padding: 2.5rem;
+    }
+  }
+
+  .profile-avatar-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem; // Space between avatar and change button
+    
+    .avatar-container {
+        position: relative;
+        cursor: pointer;
+        width: 130px;
+        height: 130px;
+        border-radius: 50%;
+        overflow: hidden; // Ensure overlay fits
+        border: 4px solid $primary-color-start; // Theme border
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        
+        @media (min-width: 768px) {
+            width: 160px;
+            height: 160px;
+        }
+
+        .profile-avatar {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .avatar-edit-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: rgba($dark-text-color, 0.6);
+            color: $light-text-color;
+            text-align: center;
+            padding: 0.5rem 0;
+            font-size: 0.8rem;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            svg { margin-right: 0.3rem; }
+        }
+        &:hover .avatar-edit-overlay {
+            opacity: 1;
+        }
+    }
+  }
+
+  .profile-form-section {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem; 
+
+    .form-field {
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+
+      label {
+        font-size: 0.9rem;
+        color: $secondary-color;
+        font-weight: 500;
+      }
+
+      .name-input { // Input for name
+        width: 100%;
+        padding: 0.75rem 1rem;
+        font-size: 1.05rem;
+        font-family: $font-family-main;
+        border: 1px solid $border-color-light;
+        border-radius: 6px;
+        background-color: $background-extralight; // Slightly off-white
+        color: $dark-text-color;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+
+        &:focus {
+          outline: none;
+          border-color: $primary-color-end;
+          box-shadow: 0 0 0 3px rgba($primary-color-start, 0.2);
+        }
+      }
+
+      .phone-display { // For displaying phone number as text
+        font-size: 1.05rem;
+        color: $dark-text-color;
+        padding: 0.75rem 1rem;
+        background-color: darken($background-page, 3%); // Slightly different bg to indicate non-editable
+        border-radius: 6px;
+        border: 1px solid $border-color-light;
+        word-break: break-all;
+      }
+    }
+    
+    .save-profile-button { // Specific styling for the save button
+        align-self: flex-start; // Align to the left
+        margin-top: 0.5rem;
+    }
+  }
+
+  .profile-links-section {
+    width: 100%;
+    margin-top: 2rem; 
+    padding-top: 1.5rem;
+    border-top: 1px solid $border-color-light; // Separator line
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start; // Align links to the left
+    gap: 1rem;
+
+    .profile-action-link {
+      font-size: 1rem;
+      color: $dark-text-color; // Use dark text for links
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.5rem 0; // Minimal padding, more like text
+      font-weight: 500;
+      transition: color 0.2s ease;
+      cursor: pointer;
+
+      svg {
+        color: $primary-color-end; // Icon color
+        font-size: 1.2em;
+      }
+
+      &:hover {
+        color: $primary-color-end;
+        svg {
+            color: darken($primary-color-end, 10%);
+        }
+      }
+      &.logout-link {
+        color: $danger-color; // Specific color for logout
+         svg {
+            color: $danger-color;
+         }
+        &:hover {
+            color: $danger-color-hover;
+            svg {
+                color: $danger-color-hover;
+            }
+        }
+      }
+    }
+  }
+}
+
+// Spinner animation
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+.spinner-icon.inline { 
+    margin-right: 0.5rem;
+    animation: spin 1s linear infinite;
+    font-size: 1em; 
+}

@@ -1,0 +1,299 @@
+// src/pages/UserOrders/user-orders.scss
+
+// --- Variables & Mixins (Ensure consistency with your theme) ---
+$primary-color-start: #ffbc36;
+$primary-color-end: #e08f00;
+$primary-gradient: linear-gradient(135deg, $primary-color-start 0%, $primary-color-end 100%);
+$secondary-color: #5f6368;
+$light-text-color: #ffffff;
+$dark-text-color: #202124;
+$background-page: #f8f9fa;
+$border-color-light: #e0e0e0;
+$font-family-main: 'Roboto', 'Arial', sans-serif;
+$font-family-headings: 'Montserrat', 'Arial', sans-serif;
+$watermark-url: '/assets/icons/watermark.svg';
+$border-radius-main: 12px;
+$card-shadow: 0 4px 12px rgba(0,0,0,0.08);
+
+@mixin section-padding {
+  padding: 2rem 1rem;
+  position: relative;
+  @media (min-width: 768px) { padding: 3rem 1.5rem; }
+}
+
+@mixin subtle-watermark($opacity: 0.015, $z-index: -1, $filter: grayscale(100%) contrast(0.5) brightness(1.5)) {
+  content: '';
+  position: fixed;
+  top: 0; bottom: 0; left: 0; right: 0;
+  background: url($watermark-url) no-repeat center center / cover;
+  opacity: $opacity;
+  z-index: $z-index;
+  pointer-events: none;
+  filter: $filter;
+}
+
+.section-title {
+  font-family: $font-family-headings;
+  font-size: 2rem; font-weight: 700; color: $primary-color-end;
+  text-align: center; margin-bottom: 1rem; position: relative; z-index: 1;
+  @media (min-width: 768px) { font-size: 2.5rem; margin-bottom: 1.5rem;}
+}
+
+.cta-button {
+  padding: 0.75rem 1.75rem; font-size: 0.95rem; font-weight: 500;
+  font-family: $font-family-main;
+  border-radius: 25px; cursor: pointer; transition: all 0.2s ease-out;
+  text-decoration: none; display: inline-flex; align-items: center; justify-content: center;
+  border: 1px solid transparent; text-transform: none; letter-spacing: 0.1px;
+  min-width: 160px; line-height: 1.5;
+  &.primary { 
+    background: $primary-gradient; color: $light-text-color; border-color: $primary-color-end;
+    &:hover { box-shadow: 0 2px 4px rgba(0,0,0,0.15), 0 1px 2px rgba(0,0,0,0.1); filter: brightness(1.05); }
+  }
+}
+// --- End of Base Styles ---
+
+.UserOrdersPage {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: $background-page;
+  font-family: $font-family-main;
+  position: relative;
+
+  &::before { 
+    @include subtle-watermark();
+  }
+
+  .user-orders-header {
+    background-color: $light-text-color;
+    border-bottom: 1px solid $border-color-light;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+    
+    .section-title {
+      margin-bottom: 1rem; 
+    }
+  }
+
+  .order-search-filter {
+    position: relative;
+    max-width: 500px;
+    margin: 0 auto 1rem auto; 
+
+    input[type="text"] {
+      width: 100%;
+      padding: 0.8rem 1rem;
+      padding-left: 2.75rem; 
+      font-size: 1rem;
+      font-family: $font-family-main;
+      border: 1px solid darken($background-page, 10%);
+      border-radius: 25px;
+      background-color: $light-text-color;
+      color: $dark-text-color;
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+
+      &::placeholder {
+        color: lighten($secondary-color, 15%);
+        font-weight: 400;
+      }
+      &:focus {
+        outline: none;
+        border-color: $primary-color-end;
+        box-shadow: 0 0 0 3px rgba($primary-color-start, 0.25);
+      }
+    }
+    &::before { 
+        content: '🔍'; 
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 1.1rem;
+        color: $secondary-color;
+        opacity: 0.7;
+        pointer-events: none;
+    }
+  }
+
+  .user-orders-content {
+    flex-grow: 1;
+    width: 100%;
+    max-width: 900px; 
+    margin: 0 auto; 
+  }
+
+  .orders-list-container {
+    display: grid;
+    grid-template-columns: 1fr; 
+    gap: 1.5rem; 
+    
+    @media (min-width: 768px) {
+      // grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    }
+  }
+
+  .order-card {
+    background-color: $light-text-color;
+    border-radius: $border-radius-main;
+    box-shadow: $card-shadow;
+    padding: 1.25rem;
+    transition: box-shadow 0.3s ease;
+
+    &:hover {
+      box-shadow: 0 6px 16px rgba($dark-text-color, 0.1);
+    }
+
+    .order-card-header {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+      margin-bottom: 1rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px dashed $border-color-light;
+
+      @media (min-width: 600px) {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .order-info {
+        display: flex;
+        flex-direction: column;
+        gap: 0.1rem;
+         @media (min-width: 600px) {
+            align-items: flex-start;
+         }
+      }
+
+      .order-id-text {
+        font-family: $font-family-headings;
+        font-size: 1rem;
+        font-weight: 600;
+        color: $dark-text-color;
+      }
+      .order-status {
+        font-size: 0.8rem;
+        font-weight: 500;
+        padding: 0.2rem 0.5rem;
+        border-radius: 15px;
+        color: $light-text-color;
+        text-transform: capitalize;
+        display: inline-block; // So it doesn't take full width
+        margin-top: 0.25rem;
+
+        &.status-pending, &.status-pending_payment { background-color: $secondary-color; }
+        &.status-confirmed, &.status-processing { background-color: $primary-color-start; color: $dark-text-color; }
+        &.status-delivered, &.status-completed { background-color: #4CAF50; } 
+        &.status-cancelled, &.status-failed { background-color: #f44336; } 
+        &.status-shipped, &.status-ready_for_pickup, &.status-out_for_delivery { background-color: #2196F3; } 
+      }
+
+      .order-meta {
+        text-align: left;
+        margin-top: 0.5rem;
+        @media (min-width: 600px) {
+            text-align: right;
+            margin-top: 0;
+        }
+        .order-restaurant, .order-date {
+            display: block;
+            font-size: 0.85rem;
+            color: $secondary-color;
+        }
+        .order-restaurant {
+            font-weight: 500;
+        }
+      }
+    }
+
+    .order-products-summary {
+      margin-bottom: 1rem;
+      .summary-product-item {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.9rem;
+        color: $secondary-color;
+        padding: 0.4rem 0; // Increased padding
+        &:not(:last-child) {
+            border-bottom: 1px dotted lighten($border-color-light, 5%);
+        }
+        .product-name-icon {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            .product-veg-indicator {
+                width: 14px;
+                height: 14px;
+            }
+        }
+        span:last-child { // Price part
+            font-weight: 500;
+            color: $dark-text-color;
+        }
+      }
+      .summary-more-items {
+        font-size: 0.8rem;
+        color: $secondary-color;
+        text-align: right;
+        margin-top: 0.5rem;
+        font-style: italic;
+      }
+    }
+
+    .order-card-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 1rem;
+      border-top: 1px solid $border-color-light;
+
+      .footer-left {
+        display: flex;
+        flex-direction: column; // Stack label and amount
+        align-items: flex-start;
+      }
+
+      .order-total-label {
+        font-size: 0.9rem;
+        color: $secondary-color;
+        font-weight: 500;
+      }
+      .order-total-amount {
+        font-family: $font-family-headings;
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: $primary-color-end;
+      }
+      .footer-right {
+        // This will contain the invoice button
+      }
+    }
+  }
+
+  .no-orders-message {
+    text-align: center;
+    padding: 3rem 1rem;
+    background-color: $light-text-color;
+    border-radius: $border-radius-main;
+    box-shadow: $card-shadow;
+    
+    p {
+      font-size: 1.1rem;
+      color: $secondary-color;
+      margin-bottom: 1.5rem;
+    }
+  }
+}
+
+.orders-loading-state,
+.orders-error-state {
+  text-align: center;
+  padding: 4rem 1rem;
+  font-size: 1.2rem;
+  color: $secondary-color;
+  min-height: 300px; 
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

@@ -1,0 +1,39 @@
+// src/components/Invoice/invoice-generator-button.scss
+
+// Assuming variables are available from your global scope or imported.
+$primary-color-start: #ffbc36;
+$primary-color-end: #e08f00;
+$dark-text-color: #202124;
+$light-text-color: #ffffff;
+$font-family-main: 'Roboto', 'Arial', sans-serif;
+
+.invoice-download-button {
+  background-color: transparent;
+  border: 1px solid $primary-color-end;
+  color: $primary-color-end;
+  padding: 0.4rem 0.8rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+  font-family: $font-family-main;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.2s ease-out;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+
+  svg { // If you add an icon inside the button
+    font-size: 1em;
+  }
+
+  &:hover {
+    background-color: $primary-color-end;
+    color: $light-text-color;
+    border-color: $primary-color-end;
+    box-shadow: 0 2px 5px rgba($primary-color-end, 0.2);
+  }
+
+  &:active {
+    transform: translateY(1px);
+  }
+}
