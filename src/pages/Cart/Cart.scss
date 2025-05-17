@@ -1,0 +1,304 @@
+// src/pages/Cart/cart.scss
+
+// --- Variables & Mixins (Ensure these are consistent with your theme) ---
+$primary-color-start: #ffbc36;
+$primary-color-end: #e08f00;
+$primary-gradient: linear-gradient(135deg, $primary-color-start 0%, $primary-color-end 100%);
+$secondary-color: #5f6368;
+$light-text-color: #ffffff;
+$dark-text-color: #202124;
+$background-page: #f8f9fa;
+$border-color-light: #e0e0e0;
+$font-family-main: 'Roboto', 'Arial', sans-serif;
+$font-family-headings: 'Montserrat', 'Arial', sans-serif;
+$watermark-url: '/assets/icons/watermark.svg';
+$border-radius-main: 12px;
+$card-shadow: 0 4px 12px rgba(0,0,0,0.08);
+
+@mixin section-padding {
+  padding: 2rem 1rem; // Base padding
+  position: relative;
+  @media (min-width: 768px) { padding: 3rem 1.5rem; }
+}
+
+@mixin subtle-watermark($opacity: 0.015, $z-index: -1, $filter: grayscale(100%) contrast(0.5) brightness(1.5)) {
+  content: '';
+  position: fixed;
+  top: 0; bottom: 0; left: 0; right: 0;
+  background: url($watermark-url) no-repeat center center / cover;
+  opacity: $opacity;
+  z-index: $z-index;
+  pointer-events: none;
+  filter: $filter;
+}
+
+.section-title { // Copied from other pages for consistency
+  font-family: $font-family-headings;
+  font-size: 2rem; font-weight: 700; color: $primary-color-end;
+  text-align: center; margin-bottom: 1rem; position: relative; z-index: 1;
+  @media (min-width: 768px) { font-size: 2.5rem; margin-bottom: 1.5rem;}
+}
+
+.cta-button { // Copied from other pages
+  padding: 0.75rem 1.75rem; font-size: 0.95rem; font-weight: 500;
+  font-family: $font-family-main;
+  border-radius: 25px; cursor: pointer; transition: all 0.2s ease-out;
+  text-decoration: none; display: inline-flex; align-items: center; justify-content: center;
+  border: 1px solid transparent;
+  text-transform: none; letter-spacing: 0.1px;
+  min-width: 160px; line-height: 1.5;
+  &.primary { 
+    background: $primary-gradient; color: $light-text-color; border-color: $primary-color-end;
+    &:hover { box-shadow: 0 2px 4px rgba(0,0,0,0.15), 0 1px 2px rgba(0,0,0,0.1); filter: brightness(1.05); }
+  }
+  &.large { padding: 0.9rem 2rem; font-size: 1.05rem; }
+}
+// --- End of Base Styles ---
+
+
+.CartPage {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: $background-page;
+  font-family: $font-family-main;
+  position: relative;
+
+  &::before { // Page-level watermark
+    @include subtle-watermark();
+  }
+
+  .cart-page-header {
+    background-color: $light-text-color;
+    border-bottom: 1px solid $border-color-light;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+
+    .section-title {
+      margin-bottom: 0.25rem;
+    }
+    .cart-restaurant-name {
+      font-size: 1rem;
+      color: $secondary-color;
+      font-weight: 500;
+    }
+  }
+
+  .cart-content-wrapper {
+    flex-grow: 1;
+    width: 100%;
+    max-width: 700px; // Max width for cart content for readability
+    margin: 0 auto; // Center content
+    display: flex;
+    flex-direction: column;
+    gap: 2rem; // Space between item list and summary
+
+    @media (min-width: 992px) { // Two column layout on larger screens
+      flex-direction: row;
+      align-items: flex-start; // Align items to top
+      max-width: 1100px;
+      gap: 3rem;
+    }
+  }
+
+  .cart-items-list {
+    flex: 2; // Takes more space in a two-column layout
+    display: flex;
+    flex-direction: column;
+    gap: 1rem; // Space between cart items
+  }
+
+  .cart-item-card {
+    background-color: $light-text-color;
+    border-radius: $border-radius-main;
+    box-shadow: $card-shadow;
+    padding: 1rem;
+    display: flex;
+    align-items: center; // Vertically align content of card
+    gap: 1rem; // Space between info and actions
+
+    .item-info {
+      flex-grow: 1;
+      .item-name {
+        font-family: $font-family-headings;
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: $dark-text-color;
+        margin-bottom: 0.25rem;
+      }
+      .item-price {
+        font-size: 1rem;
+        color: $primary-color-end;
+        font-weight: 500;
+      }
+    }
+
+    .item-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem; // Space between quantity control and delete button
+
+      .quantity-control {
+        display: flex;
+        align-items: center;
+        border: 1px solid $border-color-light;
+        border-radius: 20px;
+        overflow: hidden;
+
+        button {
+          background-color: transparent;
+          border: none;
+          color: $primary-color-end;
+          font-size: 1.3rem; // Larger +/-
+          font-weight: 400;
+          padding: 0.3rem 0.8rem;
+          cursor: pointer;
+          line-height: 1;
+          transition: background-color 0.2s ease;
+          &:hover {
+            background-color: lighten($primary-color-start, 40%);
+          }
+        }
+        .item-quantity {
+          font-size: 1rem;
+          font-weight: 500;
+          color: $dark-text-color;
+          padding: 0 0.75rem;
+          min-width: 20px;
+          text-align: center;
+        }
+      }
+
+      .item-delete-button {
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 0.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        img {
+          width: 18px;
+          height: 18px;
+          opacity: 0.6;
+          transition: opacity 0.2s ease;
+        }
+        &:hover img {
+          opacity: 1;
+        }
+      }
+    }
+  }
+
+  .empty-cart-message {
+    text-align: center;
+    padding: 3rem 1rem;
+    background-color: $light-text-color;
+    border-radius: $border-radius-main;
+    box-shadow: $card-shadow;
+    flex-grow: 1; // Take space if it's the only thing
+
+    p {
+      font-size: 1.1rem;
+      color: $secondary-color;
+      margin-bottom: 1.5rem;
+    }
+  }
+
+  .order-summary-section {
+    flex: 1; // Takes less space in two-column layout
+    background-color: $light-text-color;
+    padding: 1.5rem;
+    border-radius: $border-radius-main;
+    box-shadow: $card-shadow;
+    position: sticky; // Make summary sticky on desktop
+    top: 0rem; // Adjust based on your header height if any
+
+    @media (max-width: 991px) { // On mobile, it's a fixed bar at the bottom
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      border-radius: $border-radius-main $border-radius-main 0 0;
+      box-shadow: 0 -4px 15px rgba(0,0,0,0.1);
+      z-index: 100;
+      background: $primary-gradient; // Use gradient for fixed bar
+      color: $light-text-color;
+      padding: 1rem;
+      padding-bottom: calc(1rem + env(safe-area-inset-bottom)); // For iPhone X notch
+    }
+
+    .summary-title {
+      font-family: $font-family-headings;
+      font-size: 1.4rem;
+      font-weight: 600;
+      color: $dark-text-color;
+      margin-bottom: 1.5rem;
+      text-align: center;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid $border-color-light;
+       @media (max-width: 991px) {
+        color: $light-text-color;
+        border-bottom-color: rgba($light-text-color, 0.3);
+        font-size: 1.2rem;
+        margin-bottom: 1rem;
+      }
+    }
+
+    .summary-item {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 0.75rem;
+      font-size: 0.95rem;
+      color: $secondary-color;
+
+      p { margin: 0; }
+      span { font-weight: 500; color: $dark-text-color; }
+
+      &.total {
+        font-size: 1.1rem;
+        font-weight: 700;
+        margin-top: 1rem;
+        padding-top: 1rem;
+        border-top: 1px dashed $border-color-light;
+        p, span { color: $dark-text-color; }
+      }
+      
+      @media (max-width: 991px) { // Styles for fixed bottom bar
+        color: rgba($light-text-color, 0.9);
+        span { color: $light-text-color; }
+        &.total {
+            border-top-color: rgba($light-text-color, 0.3);
+             p, span { color: $light-text-color; }
+        }
+      }
+    }
+
+    .place-order-button {
+      width: 100%;
+      margin-top: 1.5rem;
+      // Uses .cta-button.primary.large styles
+      &:disabled {
+        background: lighten($secondary-color, 30%);
+        border-color: lighten($secondary-color, 30%);
+        cursor: not-allowed;
+         &:hover {
+            filter: none;
+            box-shadow: none;
+         }
+      }
+      @media (max-width: 991px) {
+        background: $light-text-color;
+        color: $primary-color-end;
+        border-color: $light-text-color;
+         &:hover {
+            background-color: darken($light-text-color, 5%);
+         }
+         &:disabled {
+            background: darken($light-text-color, 10%);
+            color: lighten($secondary-color, 10%);
+         }
+      }
+    }
+  }
+}

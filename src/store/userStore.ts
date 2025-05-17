@@ -1,34 +1,37 @@
 // src/store/userStore.ts
 
 import { create } from 'zustand';
-import { UserStore, UserProfile, Order } from '../types/user.types';
+// Import types from the new user.types.ts file
+import { UserStore, UserProfile, Order, UserStoreActions, UserStoreState } from '../types/user.types'; 
 import { auth } from '../config/firebaseConfig'; // Adjust path as needed
 import * as userService from '../services/userService'; // Assuming userService.ts is in ../services/
 import firebase from 'firebase/compat/app'; // For firebase.User type
 
-export const useUserStore = create<UserStore>((set, get) => ({
-  // Initial State
+// Initial state defined using the imported type
+const initialState: UserStoreState = {
   currentUser: null,
   firebaseUser: null,
   isAuthenticated: false,
   isLoading: true, // Start as true until auth state is confirmed
   error: null,
   isAdmin: null,
+};
+
+export const useUserStore = create<UserStore>((set, get) => ({
+  ...initialState,
 
   // Actions
   setFirebaseUser: (fbUser: firebase.User | null) => {
     set({ firebaseUser: fbUser, isAuthenticated: !!fbUser, isLoading: false });
     if (fbUser) {
-      // User is signed in, fetch their profile details
       get().fetchUserDetails(fbUser.uid);
-      // Store UID in localStorage for potential fallback (though live auth state is preferred)
       localStorage.setItem('uid', fbUser.uid);
-      if (fbUser.phoneNumber) { // Store phone number if available from Firebase Auth
+      if (fbUser.phoneNumber) {
         localStorage.setItem('number', fbUser.phoneNumber);
       }
     } else {
-      // User is signed out
-      set({ currentUser: null, isAdmin: null, error: null });
+      // When user signs out or auth state is null
+      set({ currentUser: null, isAdmin: null, error: null, isAuthenticated: false }); // ensure isAuthenticated is false
       localStorage.removeItem('uid');
       localStorage.removeItem('number');
     }
@@ -61,11 +64,12 @@ export const useUserStore = create<UserStore>((set, get) => ({
   },
 
   signOutUser: async () => {
-    set({ isLoading: true });
+    set({ isLoading: true }); // Indicate loading state during sign out
     try {
-      await userService.signOut();
-      // The onAuthStateChanged listener (setup below) will handle clearing firebaseUser and currentUser
-      // No need to call setFirebaseUser(null) here if onAuthStateChanged is active
+      await userService.signOut(); // This service function calls firebase.auth().signOut()
+      // The onAuthStateChanged listener will then call setFirebaseUser(null),
+      // which handles clearing local state and localStorage.
+      // No need to call set({ isLoading: false }) here if setFirebaseUser handles it.
     } catch (err: any) {
       console.error("Error in signOutUser action:", err);
       set({ error: err.message || 'Sign out failed.', isLoading: false });
@@ -75,8 +79,8 @@ export const useUserStore = create<UserStore>((set, get) => ({
   addUserDetails: async (uid: string, phone: string) => {
     set({ isLoading: true, error: null });
     try {
-      await userService.addUserDetailsToDb(uid, phone);
-      // Optionally re-fetch user details or update local state optimistically
+      // Assuming details might be more than just phone in the future for UserProfile
+      await userService.addUserDetailsToDb(uid, phone, { /* other initial details if any */ });
       await get().fetchUserDetails(uid); // Re-fetch to ensure consistency
     } catch (err: any) {
       console.error("Error in addUserDetails action:", err);
@@ -89,11 +93,12 @@ export const useUserStore = create<UserStore>((set, get) => ({
         set({ error: "User not authenticated to add order."});
         return null;
     }
-    set({ isLoading: true, error: null });
+    set({ isLoading: true, error: null }); // Consider a more specific loading state if needed
     try {
       const newOrderId = await userService.addUserOrderToDb(uid, orderData);
-      // Optionally, re-fetch user details/orders or update optimistically
-      await get().fetchUserDetails(uid); // Re-fetch to update orders in profile
+      // After adding an order, re-fetch user details to update the user's orders list
+      // This assumes orders are part of the UserProfile or fetched via fetchUserDetails.
+      await get().fetchUserDetails(uid); 
       set({ isLoading: false });
       return newOrderId;
     } catch (err: any) {
@@ -106,36 +111,47 @@ export const useUserStore = create<UserStore>((set, get) => ({
   clearUserError: () => {
     set({ error: null });
   },
+
+  // Implementation for cleanupAllListeners
+  cleanupAllListeners: () => {
+    console.log("UserStore: cleanupAllListeners called. Cleaning up auth listener.");
+    cleanupAuthListener(); // Call the specific cleanup function for the auth listener
+    // If other listeners were managed by this store (e.g., in an activeListeners map),
+    // they would be cleaned up here too.
+  },
 }));
 
-// Listen to Firebase Auth state changes and update the store accordingly
-// This is crucial for keeping the app's auth state in sync.
-// This should be called once when your application initializes.
+// --- Auth Listener Management ---
+// (This part remains the same as you provided)
 let unsubscribeFromAuthStateChanged: firebase.Unsubscribe | null = null;
 
 export const initializeAuthListener = () => {
   if (unsubscribeFromAuthStateChanged) {
-    unsubscribeFromAuthStateChanged(); // Unsubscribe from previous listener if any
+    unsubscribeFromAuthStateChanged(); 
   }
   unsubscribeFromAuthStateChanged = auth.onAuthStateChanged(user => {
     useUserStore.getState().setFirebaseUser(user);
-  }, error => {
-    console.error("Auth state listener error:", error);
-    useUserStore.getState().setFirebaseUser(null); // Ensure state is cleared on error
-    useUserStore.getState().error = "Authentication listener failed.";
+  }, (errorObject: Error) => { // Explicitly type errorObject
+    console.error("Auth state listener error:", errorObject);
+    useUserStore.getState().setFirebaseUser(null); 
+    // Avoid setting error directly on the store from here, let setFirebaseUser handle it
+    // or dispatch a specific error action if needed.
+    // For now, setFirebaseUser(null) will clear the user state.
+    // If you want to show an auth listener error:
+    // set(state => ({ ...state, error: "Authentication listener failed."}));
   });
-  return unsubscribeFromAuthStateChanged;
+  return unsubscribeFromAuthStateChanged; // Return the unsubscribe function
 };
 
-// Call this when your app unmounts or is about to close, if necessary.
 export const cleanupAuthListener = () => {
     if (unsubscribeFromAuthStateChanged) {
         unsubscribeFromAuthStateChanged();
+        unsubscribeFromAuthStateChanged = null; // Good practice to nullify after unsubscribing
+        console.log("UserStore: Auth listener cleaned up.");
     }
 };
 
 // Automatically initialize the auth listener when the store module is loaded.
-// This ensures that as soon as the app starts, it begins listening for auth changes.
-if (typeof window !== 'undefined') { // Ensure this runs only in the browser
+if (typeof window !== 'undefined') { 
     initializeAuthListener();
 }

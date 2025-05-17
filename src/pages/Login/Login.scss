@@ -1,0 +1,172 @@
+// login.scss
+
+// --- Import or Define Variables & Mixins ---
+$primary-color-start: #ffbc36;
+$primary-color-end: #e08f00;
+$primary-gradient: linear-gradient(135deg, $primary-color-start 0%, $primary-color-end 100%);
+$secondary-color: #5f6368; 
+$light-text-color: #ffffff;
+$dark-text-color: #202124; 
+$background-page: #f8f9fa; 
+$font-family-main: 'Roboto', 'Arial', sans-serif;
+$font-family-headings: 'Montserrat', 'Arial', sans-serif;
+$watermark-url: '/assets/icons/watermark.svg'; 
+$border-radius-main: 12px;
+$card-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+
+@mixin section-padding {
+  padding: 2rem 1rem;
+  position: relative;
+  overflow: hidden;
+  @media (min-width: 768px) { padding: 3rem 1.5rem; }
+}
+
+@mixin subtle-watermark($opacity: 0.02, $z-index: -1, $filter: grayscale(100%) contrast(0.5) brightness(1.2)) {
+  content: '';
+  position: fixed; // Fixed to cover the whole viewport background
+  top: 0; bottom: 0; left: 0; right: 0;
+  background: url($watermark-url) no-repeat center center / cover;
+  opacity: $opacity;
+  z-index: $z-index;
+  pointer-events: none;
+  filter: $filter;
+}
+// --- End of base styles ---
+
+
+.LoginPage {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  font-family: $font-family-main;
+  background-color: $background-page;
+  position: relative; // For watermark
+
+  &::before { // Page-level watermark
+    @include subtle-watermark();
+  }
+
+  .login-content-wrapper {
+    flex-grow: 1;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center; // Center content vertically
+  }
+
+  .login-logo-container {
+    margin-bottom: 2rem;
+    cursor: pointer;
+    @media (min-width: 768px) {
+      margin-bottom: 2.5rem;
+    }
+
+    .login-logo {
+      width: 200px; // Adjust size as needed
+      max-width: 80%;
+      height: auto;
+      @media (min-width: 768px) {
+        width: 240px;
+      }
+    }
+  }
+
+  .login-card {
+    background-color: $light-text-color;
+    padding: 2rem 1.5rem;
+    border-radius: $border-radius-main;
+    box-shadow: $card-shadow;
+    width: 100%;
+    max-width: 450px; // Max width for the login form card
+    text-align: center;
+    position: relative; // Ensure content is above page watermark
+    z-index: 1;
+
+    @media (min-width: 768px) {
+      padding: 2.5rem 2rem;
+    }
+  }
+
+  .login-title {
+    font-family: $font-family-headings;
+    font-size: 1.8rem;
+    font-weight: 600;
+    color: $dark-text-color;
+    margin-bottom: 0.5rem;
+    @media (min-width: 768px) {
+      font-size: 2rem;
+    }
+  }
+
+  .login-subtitle {
+    font-size: 0.95rem;
+    color: $secondary-color;
+    margin-bottom: 2rem;
+    line-height: 1.5;
+    @media (min-width: 768px) {
+      font-size: 1rem;
+    }
+  }
+
+  // FirebaseUI Container Styling
+  #firebaseui-auth-container {
+    margin-top: 1rem; // Space above the FirebaseUI widget
+    .firebaseui-card-header {
+      display: none; // Hide FirebaseUI's default header, we have our own
+    }
+    .firebaseui-idp-button { // Style for phone button
+      background-color: $primary-color-end !important;
+      color: $light-text-color !important;
+      border-radius: 25px !important;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+      font-family: $font-family-main !important;
+      font-weight: 500 !important;
+      text-transform: none !important; // Override FirebaseUI's uppercase
+      &:hover {
+        background-color: darken($primary-color-end, 5%) !important;
+      }
+    }
+    .firebaseui-textfield.mdl-textfield .firebaseui-label::after,.mdl-textfield__label:after{
+        background-color: $primary-color-start;
+    }
+    .firebaseui-input, .firebaseui-input-select select {
+      font-family: $font-family-main !important;
+    //   border-radius: 8px !important;
+    //   border: 1px solid #ccc !important;
+      &:focus {
+        border-color: $primary-color-end !important;
+        // box-shadow: 0 0 0 2px rgba($primary-color-start, 0.2) !important;
+      }
+    }
+    .firebaseui-button { // General buttons within FirebaseUI (e.g., Send SMS, Verify)
+      background-color: $primary-color-start !important;
+      color: $light-text-color !important;
+      border-radius: 25px !important;
+      font-weight: 500 !important;
+      text-transform: none !important;
+      &:hover {
+        background-color: darken($primary-color-start, 5%) !important;
+      }
+    }
+    .firebaseui-link {
+      color: $primary-color-end !important;
+      &:hover {
+        color: darken($primary-color-end, 10%) !important;
+      }
+    }
+    .firebaseui-tospp-links {
+        margin-top: 1.5rem !important;
+    }
+    // You might need to inspect FirebaseUI elements to target them more specifically
+    // if the default overrides are not enough.
+  }
+
+  .firebaseui-loader {
+    margin-top: 1rem;
+    font-size: 0.9rem;
+    color: $secondary-color;
+  }
+
+  // Remove original SCSS for .mobile-number, .otp-number, .send-otp as FirebaseUI handles this
+}

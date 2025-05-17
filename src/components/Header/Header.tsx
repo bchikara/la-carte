@@ -1,11 +1,14 @@
+// src/components/Header/Header.tsx
 import React, { useState } from 'react';
 import { useNavigate } from "react-router-dom";
-import './Header.scss'; // We'll create this SCSS file next
-import LaCarteLogo from '../../assets/icons/la_carte.png'
+import './Header.scss'; // Assuming SCSS file exists in the same directory
+import LaCarteLogo from '../../assets/icons/la_carte.png'; // Adjust path as needed
+import { useUserStore } from '../../store/userStore'; // Adjust path as needed
+
 // Example navigation links, adjust as needed
 const navLinks = [
   { path: '/', label: 'Home' },
-  { path: '/explore', label: 'Explore' },
+  { path: '/explore', label: 'Explore' }, // Restaurants/Order page
   { path: '/about', label: 'About Us' },
   { path: '/contact', label: 'Contact' },
 ];
@@ -13,6 +16,7 @@ const navLinks = [
 const Header: React.FC = () => {
     const navigate = useNavigate();
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const { isAuthenticated, currentUser, signOutUser } = useUserStore(); // Get auth state and user
 
     const handleNavigate = (path: string) => {
         navigate(path);
@@ -23,11 +27,26 @@ const Header: React.FC = () => {
         setIsMobileMenuOpen(!isMobileMenuOpen);
     };
 
+    const handleProfileClick = () => {
+        // Navigate to a profile page or open a profile dropdown
+        // For admin users, this could navigate to an admin dashboard
+        if (currentUser?.isAdmin && currentUser.restaurantId) {
+            handleNavigate(`/admin/restaurant/${currentUser.restaurantId}/home`);
+        } else {
+            handleNavigate('/profile'); // General user profile page
+        }
+    };
+    
+    const handleSignOut = async () => {
+        await signOutUser();
+        handleNavigate('/'); // Navigate to home after sign out
+    }
+
     return (
         <header className="Header">
             <div className="header-content">
                 <div className="header-logo" onClick={() => handleNavigate('/')}>
-                    <img src={LaCarteLogo} width={100} alt="la-carte-logo" />
+                    <img src={LaCarteLogo} width={100} alt="La Carte Logo" />
                 </div>
                 <nav className="header-nav-desktop">
                     {navLinks.map(link => (
@@ -37,13 +56,24 @@ const Header: React.FC = () => {
                     ))}
                 </nav>
                 <div className="header-actions-desktop">
-                    {/* Placeholder for desktop action buttons like Login/Cart */}
-                    <button className="header-action-btn" onClick={() => handleNavigate('/login')}>Login</button>
+                    {isAuthenticated ? (
+                        <>
+                            <button className="header-action-btn profile-btn" onClick={handleProfileClick}>
+                                Profile
+                            </button>
+                            <button className="header-action-btn signout-btn" onClick={handleSignOut}>
+                                Sign Out
+                            </button>
+                        </>
+                    ) : (
+                        <button className="header-action-btn" onClick={() => handleNavigate('/login')}>
+                            Login
+                        </button>
+                    )}
                     {/* <button className="header-action-btn" onClick={() => handleNavigate('/cart')}>Cart</button> */}
                 </div>
                 <div className="header-mobile-menu-icon" onClick={toggleMobileMenu}>
-                    {/* Basic hamburger icon, consider using an SVG or icon library */}
-                    &#9776;
+                    &#9776; {/* Hamburger Icon */}
                 </div>
             </div>
             {isMobileMenuOpen && (
@@ -53,7 +83,14 @@ const Header: React.FC = () => {
                             {link.label}
                         </div>
                     ))}
-                    <div className="header-nav-link-mobile" onClick={() => handleNavigate('/login')}>Login</div>
+                    {isAuthenticated ? (
+                        <>
+                            <div className="header-nav-link-mobile" onClick={handleProfileClick}>Profile</div>
+                            <div className="header-nav-link-mobile" onClick={handleSignOut}>Sign Out</div>
+                        </>
+                    ) : (
+                        <div className="header-nav-link-mobile" onClick={() => handleNavigate('/login')}>Login</div>
+                    )}
                     {/* <div className="header-nav-link-mobile" onClick={() => handleNavigate('/cart')}>Cart</div> */}
                 </nav>
             )}
