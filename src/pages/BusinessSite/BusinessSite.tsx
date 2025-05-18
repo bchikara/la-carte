@@ -154,6 +154,7 @@ function BusinessSite() {
                         <form className="early-access-form" onSubmit={onSubmitForm}>
                             <input value={formState.contactName} type="text" onChange={handleInputChange} name="contactName" placeholder="Your Full Name" required />
                             <input value={formState.restaurantName} type="text" onChange={handleInputChange} name="restaurantName" placeholder="Restaurant Name" required />
+                            <input value={formState.restaurantGST} type="text" onChange={handleInputChange} name="restaurantName" placeholder="Restaurant GST" />
                             <input value={formState.phone} type="tel" onChange={handleInputChange} name="phone" placeholder="Contact Phone Number" required />
                             <input value={formState.email} type="email" onChange={handleInputChange} name="email" placeholder="Email Address" required />
                             <textarea value={formState.message || ''} onChange={handleInputChange} name="message" placeholder="Tell us a bit about your restaurant (optional)" rows={3}></textarea>

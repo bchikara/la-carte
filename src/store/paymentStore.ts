@@ -1,4 +1,3 @@
-// src/store/paymentStore.ts
 import { create } from 'zustand';
 import {
   PaymentStore, // This type now includes _handlePlaceOrderAfterPayment
@@ -29,25 +28,16 @@ export const usePaymentStore = create<PaymentStore>((set, get) => ({
     set({ isProcessingPayment: true, paymentError: null, paymentSuccessData: null, redirectToConfirmationPath: null });
 
     try {
-      const backendResponse = await paymentService.initiatePaymentOrder(payload);
-      
-      paymentService.processWithLayer(
-        backendResponse.id, 
-        async (sdkResponse: PaymentSDKResponse) => { 
-          console.log("Layer SDK Success:", sdkResponse);
-          set({ paymentSuccessData: {
-              paymentId: sdkResponse.payment_id || 'N/A',
-              paymentStatus: sdkResponse.status,
-          }});
+    //   const backendResponse = await paymentService.initiatePaymentOrder(payload);
 
-          if (sdkResponse.status === "captured" || sdkResponse.status === "pending") {
-            // Call the correctly typed _handlePlaceOrderAfterPayment
             const orderPlaced = await get()._handlePlaceOrderAfterPayment(
-              sdkResponse.payment_id || `layer_${Date.now()}`, 
-              sdkResponse.status,
+              `layer_${Date.now()}`, 
+              'done',
               orderPlacementContext
             );
+                console.log('order placed', orderPlaced)
             if (orderPlaced) {
+                console.log('hello', orderPlaced)
                 set({ 
                     isProcessingPayment: false, 
                     redirectToConfirmationPath: orderPlacementContext.tableId
@@ -57,21 +47,49 @@ export const usePaymentStore = create<PaymentStore>((set, get) => ({
             } else {
                  set({ isProcessingPayment: false, paymentError: "Order placement failed after payment." });
             }
-          } else {
-            set({ 
-                isProcessingPayment: false, 
-                paymentError: `Payment ${sdkResponse.status}: ${sdkResponse.message || 'Please try again.'}` 
-            });
-          }
-        },
-        (sdkError: any) => { 
-          console.error("Layer SDK Error:", sdkError);
-          set({ 
-              isProcessingPayment: false, 
-              paymentError: sdkError.message || "Payment failed via Layer. Please try again." 
-          });
-        }
-      );
+      
+    //   paymentService.processWithLayer(
+    //     // backendResponse.id, 
+    //     async (sdkResponse: PaymentSDKResponse) => { 
+    //       console.log("Layer SDK Success:", sdkResponse);
+    //       set({ paymentSuccessData: {
+    //           paymentId: sdkResponse.payment_id || 'N/A',
+    //           paymentStatus: sdkResponse.status,
+    //       }});
+
+    //       if (sdkResponse.status === "captured" || sdkResponse.status === "pending") {
+    //         // Call the correctly typed _handlePlaceOrderAfterPayment
+    //         const orderPlaced = await get()._handlePlaceOrderAfterPayment(
+    //           sdkResponse.payment_id || `layer_${Date.now()}`, 
+    //           sdkResponse.status,
+    //           orderPlacementContext
+    //         );
+    //         if (orderPlaced) {
+    //             set({ 
+    //                 isProcessingPayment: false, 
+    //                 redirectToConfirmationPath: orderPlacementContext.tableId
+    //                     ? `/confirm/${orderPlacementContext.restaurantId}?table=${orderPlacementContext.tableId}`
+    //                     : `/confirm/${orderPlacementContext.restaurantId}`
+    //             });
+    //         } else {
+    //              set({ isProcessingPayment: false, paymentError: "Order placement failed after payment." });
+    //         }
+    //       } else {
+    //         set({ 
+    //             isProcessingPayment: false, 
+    //             paymentError: `Payment ${sdkResponse.status}: ${sdkResponse.message || 'Please try again.'}` 
+    //         });
+    //       }
+    //     },
+    //     (sdkError: any) => { 
+    //       console.error("Layer SDK Error:", sdkError);
+    //       set({ 
+    //           isProcessingPayment: false, 
+    //           paymentError: sdkError.message || "Payment failed via Layer. Please try again." 
+    //       });
+    //     }
+    //   );
+
     } catch (error: any) {
       console.error("Error in payment checkout process:", error);
       set({ isProcessingPayment: false, paymentError: error.message || "An unexpected error occurred during payment." });
@@ -113,7 +131,7 @@ export const usePaymentStore = create<PaymentStore>((set, get) => ({
         products: orderProducts,
         time: Date.now(),
         totalPrice: parseFloat(finalOrderAmount.toFixed(2)),
-        user: currentUser.key, // Assuming currentUser.key is the UID
+        user: currentUser.key,
         status: paymentStatus === 'captured' ? 'confirmed' : 'pending_payment', 
         paymentId: paymentId,
         paymentStatus: paymentStatus,
@@ -124,7 +142,8 @@ export const usePaymentStore = create<PaymentStore>((set, get) => ({
 
     try {
       // Ensure addUserOrder in userStore expects the correct payload structure
-      await useUserStore.getState().addUserOrder(currentUser.key, orderPayload as any); 
+      console.log('checking',orderPayload)
+      await useUserStore.getState().addUserOrder(currentUser.key, orderPayload); 
       
       if (context.tableId && currentRestaurant) {
         // Ensure addOrderToTable in restaurantService expects the correct payload

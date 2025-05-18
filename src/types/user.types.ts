@@ -2,44 +2,53 @@
 import firebase from 'firebase/compat/app'; // For firebase.User type
 
 /**
- * Interface for a product within an order.
- * This should align with how products are structured when an order is created/fetched.
+ * Interface for a product within an order from a user's perspective.
  */
 export interface OrderProduct {
-  productId: string; // ID of the product
-  name: string;      // Name of the product
+  productId: string; // ID of the product in the restaurant's menu
+  name: string;      // Denormalized product name
   quantity: number;
   price: number;     // Price per unit at the time of order
-  veg?: boolean | string; 
+  veg?: boolean | string; // Veg status, might be string from Firebase
+  // Add any other relevant product details you store with the user's order item
   [key: string]: any;
 }
 
 /**
- * Interface for a single Order.
+ * Interface for a single Order from a user's perspective.
  */
 export interface Order {
-  key: string; // Firebase key of the order, now required
-  orderId: string; // Unique identifier for the order (can be same as Firebase key)
-  products: Record<string, OrderProduct>; // Products keyed by their original productKey/ID
-  time: number; // Timestamp of the order
-  totalAmount: number; // This should be the final amount paid, including any taxes at the time of order
-  totalPrice: number; // If different from totalAmount, clarify. Assuming this is the final price.
-  orderDate: string | number; // Can be ISO string or timestamp
+  key: string; // Firebase key of the order in the user's order list
+  orderId: string; // Often the same as 'key', or a more global order identifier
+  
+  // If products are stored directly under the user's order:
+  products: Record<string, OrderProduct>; // Products keyed by their original productKey/ID from restaurant menu
+  // OR, if you only store product IDs and quantities and fetch details separately:
+  // items: Array<{ productId: string; quantity: number; priceAtOrder: number; name?: string }>;
+
+  time: number; // Timestamp of when the order was placed
+  totalPrice: number; // Final total price paid by the user for this order
+  totalAmount: number; // Often same as totalPrice, clarify if different (e.g., pre-discount)
+  
+  orderDate: string | number; // Can be ISO string or timestamp (redundant if 'time' is used)
   status: 'pending' | 'processing' | 'confirmed' | 'shipped' | 'delivered' | 'cancelled' | 'pending_payment'; 
-  restaurantId: string;
-  restaurantName?: string;
+  
+  restaurantId: string; // ID of the restaurant the order was placed with
+  restaurantName?: string; // Denormalized for easy display
   table?: string; // Table number or identifier like 'Takeaway/Delivery'
+  
   paymentId?: string;
   paymentStatus?: string;
+  // Add any other order-specific properties relevant to the user
   [key: string]: any; 
 }
 
 /**
- * Interface for the structure of user's orders as stored in Firebase.
+ * Interface for the structure of user's orders as stored in Firebase under their profile.
  * Keys are order IDs (Firebase push keys).
  */
 export interface UserOrdersFirebase {
-  [orderId: string]: Omit<Order, 'key' | 'orderId'>; 
+  [orderId: string]: Omit<Order, 'key' | 'orderId'>; // Raw order data doesn't have 'key'/'orderId' as its own property here
 }
 
 /**
@@ -49,11 +58,11 @@ export interface UserProfile {
   key: string; // Corresponds to Firebase UID
   isAdmin: boolean;
   restaurantId: string | null; 
-  phone: string; // Typically not editable by user directly after verification
-  orders?: UserOrdersFirebase; 
+  phone: string; 
+  orders?: UserOrdersFirebase; // Raw orders from Firebase, keys are order IDs
   displayName?: string | null;
-  email?: string | null; // Email might also be from Firebase Auth, can be part of profile
-  profileImageUrl?: string | null; // URL for the user's profile image
+  email?: string | null; 
+  profileImageUrl?: string | null;
   [key: string]: any;
 }
 
@@ -64,11 +73,11 @@ export interface UserStoreState {
   currentUser: UserProfile | null;
   firebaseUser: firebase.User | null; 
   isAuthenticated: boolean;
-  isLoading: boolean; 
-  error: string | null; 
+  isLoading: boolean; // General loading for user profile and auth state
+  error: string | null; // General error
   isAdmin: boolean | null; 
   
-  userOrders: Order[]; 
+  userOrders: Order[]; // Processed list of orders for display (with 'key' property)
   isLoadingUserOrders: boolean;
   errorUserOrders: string | null;
 }
@@ -82,7 +91,7 @@ export interface UserStoreActions {
   setUserDetails: (details: UserProfile | null) => void; // For direct setting if needed
   signOutUser: () => Promise<void>;
   addUserDetails: (uid: string, phone: string) => Promise<void>; // For initial setup
-  updateUserProfile: (uid: string, data: { displayName?: string; profileImageFile?: File }) => Promise<void>; // For profile updates
+  updateUserProfile: (uid: string, data: { displayName?: string; profileImageFile?: File }) => Promise<void>;
   addUserOrder: (uid: string, orderData: Omit<Order, 'key' | 'orderId'>) => Promise<string | null>; 
   clearUserError: () => void;
   

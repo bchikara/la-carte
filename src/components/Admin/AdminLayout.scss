@@ -1,0 +1,129 @@
+// src/components/Admin/admin-layout.scss
+
+$admin-sidebar-bg: #2c3e50; // Dark blue/grey
+$admin-sidebar-text-color: #ecf0f1; // Light grey/white
+$admin-sidebar-active-bg: #34495e; // Slightly lighter dark blue/grey
+$admin-sidebar-hover-bg: #3b5166;
+$admin-primary-accent: #ffbc36; // Your app's primary color
+$admin-content-bg: #f4f6f8; // Light grey for content area
+$admin-font-family: 'Roboto', 'Arial', sans-serif;
+
+.admin-layout-container {
+  display: flex;
+  min-height: 100vh;
+  font-family: $admin-font-family;
+}
+
+.admin-sidebar {
+  width: 260px;
+  background-color: $admin-sidebar-bg;
+  color: $admin-sidebar-text-color;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0; // Prevent sidebar from shrinking
+  box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+  position: fixed; // Fixed sidebar
+  top: 0;
+  left: 0;
+  bottom: 0;
+  z-index: 1000;
+
+  .sidebar-header {
+    padding: 1.5rem 1rem;
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid lighten($admin-sidebar-bg, 5%);
+    
+    .sidebar-logo {
+      height: 40px; // Adjust as needed
+      width: auto;
+      margin-right: 0.75rem;
+      // filter: brightness(0) invert(1); // If logo needs to be white
+    }
+    .sidebar-title {
+      font-size: 1.3rem;
+      font-weight: 600;
+    }
+  }
+
+  .sidebar-nav {
+    flex-grow: 1;
+    padding-top: 1rem;
+  }
+
+  .sidebar-nav-link {
+    display: flex;
+    align-items: center;
+    padding: 0.9rem 1.5rem;
+    color: $admin-sidebar-text-color;
+    text-decoration: none;
+    font-size: 0.95rem;
+    font-weight: 500;
+    transition: background-color 0.2s ease, color 0.2s ease;
+    border-left: 4px solid transparent; // For active indicator
+
+    svg { // React Icons
+      margin-right: 0.85rem;
+      font-size: 1.2em; // Relative to text
+      min-width: 20px; // Ensure icon space
+    }
+
+    &:hover {
+      background-color: $admin-sidebar-hover-bg;
+    }
+
+    &.active {
+      background-color: $admin-sidebar-active-bg;
+      color: $light-text-color; // Brighter text for active
+      border-left-color: $admin-primary-accent;
+      font-weight: 600;
+    }
+  }
+  
+  .sidebar-footer {
+    padding: 1rem;
+    border-top: 1px solid lighten($admin-sidebar-bg, 5%);
+    .logout-btn {
+        width: 100%;
+        justify-content: flex-start; // Align icon and text to start
+         &:hover {
+            color: lighten($danger-color,10%); // Using danger color from profile page
+         }
+    }
+  }
+}
+
+.admin-main-content {
+  flex-grow: 1;
+  background-color: $admin-content-bg;
+  padding: 1.5rem; // Default padding for content area
+  margin-left: 260px; // Offset by sidebar width
+  overflow-y: auto; // Allow content to scroll
+
+  @media (max-width: 768px) { // Example for mobile responsiveness
+    margin-left: 0; // Sidebar might be hidden or overlay on mobile
+    .admin-sidebar {
+      // transform: translateX(-100%); // Example: hide sidebar
+      // position: fixed; z-index: 1001;
+      // transition: transform 0.3s ease;
+      // &.open { transform: translateX(0); }
+      // For a simpler approach on mobile, you might make sidebar take full width
+      // or just let content flow below a mobile header.
+      // This example assumes a desktop-first fixed sidebar.
+      // A hamburger menu would be needed to toggle sidebar on mobile.
+      // For now, content will just be pushed by fixed sidebar.
+    }
+  }
+}
+
+// Placeholder for global loading state if needed in admin
+.auth-loading-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    font-size: 1.5rem;
+    color: $secondary-color;
+    background-color: $admin-content-bg;
+    margin-left: 260px; // Match content offset
+}

@@ -407,6 +407,7 @@ $watermark-url: '/assets/icons/watermark.svg'; // Ensure this path is correct
     }
 
     .accordion-content {
+      display: block !important;
       max-height: 0;
       overflow: hidden;
       transition: max-height 0.35s ease-out, padding 0.35s ease-out;

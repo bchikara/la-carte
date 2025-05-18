@@ -1,0 +1,87 @@
+// src/pages/Admin/admin-menu-editor-page.scss
+
+// Assuming admin theme variables are available (e.g., from admin-layout.scss or global admin theme)
+$admin-primary-accent: #ffbc36;
+$admin-content-bg: #f4f6f8;
+$dark-text-color: #202124;
+$secondary-text-color: #5f6368;
+$card-bg: #ffffff;
+$border-radius: 8px;
+$card-shadow: 0 2px 8px rgba(0,0,0,0.07);
+$font-family-headings: 'Montserrat', 'Arial', sans-serif;
+$font-family-main: 'Roboto', 'Arial', sans-serif;
+$light-text-color: #ffffff;
+
+.admin-menu-editor-page {
+  padding: 1.5rem; // Padding within the main content area of AdminLayout
+  font-family: $font-family-main;
+
+  .loading-state, .error-state, .no-menu-items-message {
+    text-align: center;
+    padding: 3rem 1rem;
+    font-size: 1.1rem;
+    color: $secondary-text-color;
+    .spinner-icon {
+      font-size: 2rem;
+      color: $admin-primary-accent;
+      margin-bottom: 0.5rem;
+      animation: spin 1s linear infinite;
+    }
+  }
+  .no-menu-items-message {
+    background-color: $card-bg;
+    border-radius: $border-radius;
+    box-shadow: $card-shadow;
+  }
+
+  .menu-editor-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid darken($admin-content-bg, 10%);
+
+    h2 {
+      font-family: $font-family-headings;
+      font-size: 1.6rem;
+      color: $dark-text-color;
+      font-weight: 600;
+      margin: 0;
+    }
+
+    .add-category-button { // Reusing .admin-cta-button if defined globally
+      background-color: $admin-primary-accent;
+      color: $light-text-color; // Assuming $light-text-color is white or light
+      border: none;
+      padding: 0.6rem 1.2rem;
+      border-radius: 20px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: background-color 0.2s ease;
+
+      &:hover {
+        background-color: darken($admin-primary-accent, 8%);
+      }
+      svg {
+        font-size: 1.1em;
+      }
+    }
+  }
+
+  .menu-structure-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem; // Space between main category sections
+  }
+}
+
+// Spinner animation (if not globally defined)
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}

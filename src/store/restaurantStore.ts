@@ -1,147 +1,174 @@
 // src/store/restaurantStore.ts
 
 import { create } from 'zustand';
-import restaurantService from '../services/restaurantService'; // Assuming singleton export
+import restaurantService from '../services/restaurantService'; // Adjust path
 import type {
   Restaurant,
   ProcessedMenu,
   RawRestaurantMenuFirebase,
   MenuCategoryData,
   MenuSubCategoryData,
-  Product,
+  Product as MenuProductType, // Renamed to avoid conflict with component name
   RawProductFirebase,
-  MenuCategory, // For action parameters
-  MenuItem,   // For action parameters
-  TableOrder, // For action parameters
-  RestaurantOrder, // For action parameters
+  MenuCategory, 
+  MenuItem,   
+  TableOrder, 
+  RestaurantOrder,
   RestaurantIdParam,
   RestaurantMenuCategoryPathKeys,
   RestaurantMenuItemPathKeys,
   RestaurantTablePathKeys,
   RestaurantTableOrderPathKeys,
+  RestaurantMenuSubCategoryPathKeys,
 } from '../types/restaurant.types'; // Adjust path
-import firebase from 'firebase/compat/app'; // For firebase.database.Reference
+import firebase from 'firebase/compat/app'; 
 
-interface ActiveListeners {
+// Define ActiveListeners specifically for this store
+interface RestaurantActiveListeners {
   allRestaurants?: () => void;
-  restaurantDetailsAndMenu?: () => void; // Combined listener for details and menu
-  tableOrders?: (restaurantId: string, tableId: string) => void; // Listener for specific table orders
-  // Add more specific listeners as needed
+  restaurantDetailsAndMenu?: () => void; 
+  tableOrders?: (restaurantId: string, tableId: string) => void; 
+  allRestaurantOrders?: (restaurantId: string) => void;
 }
 
-export interface RestaurantStoreState {
+// --- Types for Menu Editing State ---
+export type EditingItemType = 'category' | 'subCategory' | 'product' | null;
+
+export interface MenuEditingParentContext {
+    restaurantId?: string; // Added restaurantId
+    categoryId?: string; 
+    subCategoryId?: string;
+}
+
+export interface MenuEditingState {
+  isProductModalOpen: boolean;
+  isCategoryModalOpen: boolean; 
+  editingItem: MenuProductType | MenuCategoryData | MenuSubCategoryData | null;
+  editingItemType: EditingItemType;
+  parentContext?: MenuEditingParentContext; // Use the updated context type
+}
+
+// --- Store State and Actions ---
+export interface AppRestaurantStoreState { 
   restaurantsList: Restaurant[];
   currentRestaurant: Restaurant | null;
-  currentRestaurantMenu: ProcessedMenu | null; // State for processed menu
-  currentTableOrders: Record<string, TableOrder> | null; // For listenToTableOrders
-
-  isLoadingList: boolean;
-  isLoadingDetails: boolean; // For restaurant details (includes menu)
-  isLoadingMenu: boolean;    // Kept for clarity, often tied to isLoadingDetails
-  isLoadingTableOrders: boolean;
+  currentRestaurantMenu: ProcessedMenu | null; 
+  currentTableOrders: Record<string, TableOrder> | null; 
+  allRestaurantOrders: RestaurantOrder[]; 
   
-  error: string | null;      // General error for list or restaurant details
-  errorMenu: string | null;  // Specific for menu processing if needed, or use general error
+  isLoadingList: boolean;
+  isLoadingDetails: boolean; 
+  isLoadingMenu: boolean;    
+  isLoadingTableOrders: boolean;
+  isLoadingAllOrders: boolean;           
+  
+  error: string | null;      
+  errorMenu: string | null;  
   errorTableOrders: string | null;
-
-  activeListeners: ActiveListeners;
+  errorAllOrders: string | null;         
+  
+  activeListeners: RestaurantActiveListeners; 
+  menuEditing: MenuEditingState; 
 }
 
-export interface RestaurantStoreActions {
-  // Restaurant CRUD
+export interface AppRestaurantStoreActions { 
   listenToAllRestaurants: () => void;
   stopListeningToAllRestaurants: () => void;
-  
-  listenToRestaurantAndMenu: (restaurantId: string) => void; // Combined listener
-  stopListeningToRestaurantDetails: () => void; // Stops the combined listener
-
-  createRestaurant: (data: Omit<Restaurant, 'id'>) => Promise<string | null>; 
+  listenToRestaurantAndMenu: (restaurantId: string) => void; 
+  stopListeningToRestaurantDetails: () => void; 
+  createRestaurant: (data: Omit<Restaurant, 'id' | 'key'>) => Promise<string | null>; 
   updateRestaurant: (id: string, data: Partial<Restaurant>) => Promise<void>;
   deleteRestaurant: (id: string) => Promise<void>;
-
-  // Menu Category
+  
   addMenuCategory: (restaurantId: string, categoryData: Omit<MenuCategory, 'id'>) => Promise<string | null>;
+  addMenuSubCategory: (restaurantId: string,menuCategoryId:string,  categoryData: Omit<MenuCategory, 'id'>) => Promise<string | null>;
   updateMenuCategory: (keys: RestaurantMenuCategoryPathKeys, data: Partial<MenuCategory>) => Promise<void>;
   deleteMenuCategory: (keys: RestaurantMenuCategoryPathKeys) => Promise<void>;
-
-  // Menu Item
-  addMenuItem: (
-    keys: Omit<RestaurantMenuItemPathKeys, 'menuItemId'>, 
-    itemData: Omit<MenuItem, 'id'>
-  ) => Promise<string | null>;
-  updateMenuItem: (keys: RestaurantMenuItemPathKeys, itemData: Partial<MenuItem>) => Promise<void>;
+  deleteMenuSubCategory: (keys: RestaurantMenuSubCategoryPathKeys) => Promise<void>;
+  
+  addMenuItem: (keys: Omit<RestaurantMenuItemPathKeys, 'menuItemId'>, itemData: Omit<MenuItem, 'id'>, productImageFile: File | null ) => Promise<string | null>;
+  updateMenuItem: (keys: RestaurantMenuItemPathKeys, itemData: Partial<MenuItem>, productImageFile: File | null ) => Promise<void>;
   deleteMenuItem: (keys: RestaurantMenuItemPathKeys) => Promise<void>;
-
-  // Table Orders
+  
   addTableOrder: (keys: RestaurantTablePathKeys, orderData: Omit<TableOrder, 'id'>) => Promise<string | null>;
   updateTableOrder: (keys: RestaurantTableOrderPathKeys, orderData: Partial<TableOrder>) => Promise<void>;
   clearTableOrders: (keys: RestaurantTablePathKeys) => Promise<void>;
   listenToTableOrders: (keys: RestaurantTablePathKeys) => void;
   stopListeningToTableOrders: (restaurantId: string, tableId: string) => void;
-
-
-  // Restaurant Orders
-  addRestaurantOrder: (restaurantId: string, orderData: Omit<RestaurantOrder, 'id'>) => Promise<string | null>;
-  // TODO: listenToRestaurantOrders and queryOrdersFromRestaurant would also go here
-
-  clearError: () => void;
-  cleanupAllListeners: () => void;
+  addRestaurantOrder: (restaurantId: string, orderData: Omit<RestaurantOrder, 'id' | 'key'>) => Promise<string | null>;
+  listenToAllRestaurantOrders: (restaurantId: string) => void; 
+  stopListeningToAllRestaurantOrders: (restaurantId: string) => void; 
+  updateRestaurantOrderStatus: (restaurantId: string, orderId: string, newStatus: RestaurantOrder['status']) => Promise<void>; 
+  
+  // Updated signature for openProductModal context
+  openProductModal: (product?: MenuProductType, context?: MenuEditingParentContext) => void;
+  closeProductModal: () => void;
+  openCategoryModal: (
+    type: 'category' | 'subCategory', 
+    category?: MenuCategoryData | MenuSubCategoryData, 
+    context?: MenuEditingParentContext // Use the updated context type
+  ) => void;
+  closeCategoryModal: () => void;
+  
+  clearError: () => void; 
+  cleanupAllListeners: () => void; 
 }
 
-export type RestaurantStore = RestaurantStoreState & RestaurantStoreActions;
+export type AppRestaurantStore = AppRestaurantStoreState & AppRestaurantStoreActions;
 
-const initialState: RestaurantStoreState = {
+const initialRestaurantState: AppRestaurantStoreState = {
   restaurantsList: [],
   currentRestaurant: null,
   currentRestaurantMenu: null,
   currentTableOrders: null,
+  allRestaurantOrders: [], 
   isLoadingList: false,
   isLoadingDetails: false,
   isLoadingMenu: false,
   isLoadingTableOrders: false,
-  error: null,
-  errorMenu: null,
+  isLoadingAllOrders: false,           
+  error: null,      
+  errorMenu: null,  
   errorTableOrders: null,
+  errorAllOrders: null,         
   activeListeners: {},
+  menuEditing: { 
+    isProductModalOpen: false,
+    isCategoryModalOpen: false,
+    editingItem: null,
+    editingItemType: null,
+    parentContext: {}, // Initialize with an empty object or specific defaults
+  },
 };
 
-// Helper function to process raw Firebase menu into ProcessedMenu
 const processFirebaseMenu = (rawMenu?: RawRestaurantMenuFirebase): ProcessedMenu | null => {
   if (!rawMenu) return null;
   const processed: ProcessedMenu = [];
   Object.keys(rawMenu).forEach(categoryKey => {
     const rawCategory = rawMenu[categoryKey];
-    if (!rawCategory || typeof rawCategory !== 'object') return; // Skip if category is not an object
-
+    if (!rawCategory || typeof rawCategory !== 'object') return; 
     const categoryData: MenuCategoryData = {
-      key: categoryKey,
-      name: rawCategory.name || 'Unnamed Category',
-      subCategories: [],
+      key: categoryKey, name: rawCategory.name || 'Unnamed Category', subCategories: [],
     };
-    if (rawCategory.subCategory) {
+    if (rawCategory.subCategory) { 
       Object.keys(rawCategory.subCategory).forEach(subCategoryKey => {
         const rawSubCategory = rawCategory.subCategory![subCategoryKey];
-        if (!rawSubCategory || typeof rawSubCategory !== 'object') return; // Skip if subCategory is not an object
-
+        if (!rawSubCategory || typeof rawSubCategory !== 'object') return; 
         const subCategoryData: MenuSubCategoryData = {
-          key: subCategoryKey,
-          name: rawSubCategory.name || 'Unnamed Sub-Category',
-          products: [],
+          key: subCategoryKey, name: rawSubCategory.name || 'Unnamed Sub-Category', products: [],
         };
         if (rawSubCategory.products) {
           Object.keys(rawSubCategory.products).forEach(productKey => {
             const rawProduct = rawSubCategory.products![productKey] as RawProductFirebase;
-            if (!rawProduct || typeof rawProduct !== 'object') return; // Skip if product is not an object
-
+            if (!rawProduct || typeof rawProduct !== 'object') return; 
             subCategoryData.products.push({
-              key: productKey,
-              name: rawProduct.name || 'Unnamed Product',
+              key: productKey, name: rawProduct.name || 'Unnamed Product',
               description: rawProduct.description,
               price: typeof rawProduct.price === 'number' ? rawProduct.price : 0,
               veg: rawProduct.veg === true || rawProduct.veg === 'true',
-              outofstock: rawProduct.outOfStock || rawProduct.outofstock,
+              outofstock: rawProduct.outOfStock || rawProduct.outofstock, 
               icon: rawProduct.icon,
-            });
+            } as MenuProductType); 
           });
         }
         categoryData.subCategories.push(subCategoryData);
@@ -152,305 +179,357 @@ const processFirebaseMenu = (rawMenu?: RawRestaurantMenuFirebase): ProcessedMenu
   return processed;
 };
 
+export const useRestaurantStore = create<AppRestaurantStore>((set, get) => ({
+  ...initialRestaurantState,
 
-export const useRestaurantStore = create<RestaurantStore>((set, get) => ({
-  ...initialState,
+  // --- Menu Editing UI Actions ---
+  openProductModal: (product, context) => set(state => ({ 
+    menuEditing: { 
+        ...state.menuEditing, 
+        isProductModalOpen: true, 
+        editingItem: product || null, 
+        editingItemType: 'product',
+        parentContext: context // Context now includes restaurantId, categoryId, subCategoryId
+    } 
+  })),
+  closeProductModal: () => set(state => ({ 
+    menuEditing: { ...state.menuEditing, isProductModalOpen: false, editingItem: null, editingItemType: null, parentContext: {} } 
+  })),
+  
+  openCategoryModal: (type, category, context) => set(state => ({
+    menuEditing: {
+        ...state.menuEditing,
+        isCategoryModalOpen: true,
+        editingItem: category || null,
+        editingItemType: type,
+        parentContext: context, // Context now includes restaurantId, categoryId
+    }
+  })),
+  closeCategoryModal: () => set(state => ({
+    menuEditing: { ...state.menuEditing, isCategoryModalOpen: false, editingItem: null, editingItemType: null, parentContext: {} }
+  })),
 
+  // --- Existing Actions (ensure they are complete and correct) ---
   listenToAllRestaurants: () => {
-    get().stopListeningToAllRestaurants(); 
+    get().activeListeners.allRestaurants?.(); 
     set({ isLoadingList: true, error: null });
     const dbRef = restaurantService.getAll();
-    const listener = dbRef.on(
-      'value',
-      (snapshot) => {
+    const listener = dbRef.on('value', (snapshot: firebase.database.DataSnapshot) => {
         const data = snapshot.val();
         const list: Restaurant[] = data ? Object.keys(data).map(key => ({ ...data[key], id: key, key: key })) : [];
         set({ restaurantsList: list, isLoadingList: false });
       },
-      (errorObject: Error) => { // Firebase error object is typically an Error instance
-        console.error("Error listening to all restaurants:", errorObject);
+      (errorObject: Error) => { 
         set({ error: errorObject.message, isLoadingList: false });
       }
     );
     set(state => ({ activeListeners: { ...state.activeListeners, allRestaurants: () => dbRef.off('value', listener) } }));
   },
-
   stopListeningToAllRestaurants: () => {
     get().activeListeners.allRestaurants?.();
     set(state => ({ activeListeners: { ...state.activeListeners, allRestaurants: undefined } }));
   },
-
   listenToRestaurantAndMenu: (restaurantId: string) => {
-    if (!restaurantId) {
-        console.warn("listenToRestaurantAndMenu called with no restaurantId");
-        set({ error: "Restaurant ID is required.", isLoadingDetails: false, isLoadingMenu: false });
-        return;
-    }
+    if (!restaurantId) { set({ error: "Restaurant ID is required.", isLoadingDetails: false, isLoadingMenu: false }); return; }
     get().stopListeningToRestaurantDetails(); 
     set({ 
-        isLoadingDetails: true, 
-        isLoadingMenu: true, 
-        error: null, 
-        errorMenu: null, 
-        currentRestaurant: null, 
-        currentRestaurantMenu: null 
+        isLoadingDetails: true, isLoadingMenu: true, error: null, errorMenu: null, 
+        currentRestaurant: null, currentRestaurantMenu: null, allRestaurantOrders: []
     });
     const dbRef = restaurantService.get(restaurantId);
-    
-    const listener = dbRef.on(
-      'value',
-      (snapshot) => {
+    const listener = dbRef.on('value', (snapshot: firebase.database.DataSnapshot) => {
         if (snapshot.exists()) {
           const restaurantData = snapshot.val() as Restaurant; 
           const processedMenu = processFirebaseMenu(restaurantData.menu);
           set({ 
             currentRestaurant: { ...restaurantData, id: snapshot.key!, key: snapshot.key! }, 
             currentRestaurantMenu: processedMenu,
-            isLoadingDetails: false, 
-            isLoadingMenu: false 
+            isLoadingDetails: false, isLoadingMenu: false 
           });
+          get().listenToAllRestaurantOrders(snapshot.key!);
         } else {
           set({ 
-            currentRestaurant: null, 
-            currentRestaurantMenu: null, 
-            isLoadingDetails: false, 
-            isLoadingMenu: false, 
-            error: "Restaurant not found.",
-            errorMenu: "Menu not found as restaurant is missing."
+            currentRestaurant: null, currentRestaurantMenu: null, isLoadingDetails: false, 
+            isLoadingMenu: false, error: "Restaurant not found.", errorMenu: "Menu not found."
           });
         }
       },
       (errorObject: Error) => {
-        console.error(`Error listening to restaurant ${restaurantId}:`, errorObject);
-        set({ 
-            error: errorObject.message, 
-            errorMenu: errorObject.message, 
-            isLoadingDetails: false, 
-            isLoadingMenu: false 
-        });
+        set({ error: errorObject.message, errorMenu: errorObject.message, isLoadingDetails: false, isLoadingMenu: false });
       }
     );
-    set(state => ({ 
-        activeListeners: { ...state.activeListeners, restaurantDetailsAndMenu: () => dbRef.off('value', listener) } 
-    }));
+    set(state => ({ activeListeners: { ...state.activeListeners, restaurantDetailsAndMenu: () => dbRef.off('value', listener) } }));
   },
-
   stopListeningToRestaurantDetails: () => { 
     get().activeListeners.restaurantDetailsAndMenu?.();
-    set(state => ({ 
-        activeListeners: { ...state.activeListeners, restaurantDetailsAndMenu: undefined },
-        // currentRestaurant: null, // Consider if these should be cleared when listener stops
-        // currentRestaurantMenu: null,
-        // isLoadingDetails: false,
-        // isLoadingMenu: false,
-    }));
+    const restaurantId = get().currentRestaurant?.id;
+    if (restaurantId) get().stopListeningToAllRestaurantOrders(restaurantId);
+    set(state => ({ activeListeners: { ...state.activeListeners, restaurantDetailsAndMenu: undefined }}));
   },
-
-  createRestaurant: async (data) => {
-    set({ isLoadingList: true, error: null });
-    try {
-      const newRef = await restaurantService.create(data);
-      // Listener for all restaurants should pick this up.
-      set({ isLoadingList: false });
-      return newRef.key;
-    } catch (errorObject: any) {
-      set({ error: errorObject.message || 'Failed to create restaurant.', isLoadingList: false });
-      return null;
-    }
-  },
-
-  updateRestaurant: async (id, data) => {
-     set({ isLoadingDetails: true, error: null }); 
-    try {
-      await restaurantService.update(id, data);
-      // Listener for restaurant details should pick this up.
-      // Optimistic update for currentRestaurant if it's the one being edited:
-      if (get().currentRestaurant?.id === id) {
-         set(state => ({ 
-             currentRestaurant: state.currentRestaurant ? { ...state.currentRestaurant, ...data } : null,
-             isLoadingDetails: false 
-            }));
-      } else {
-        set({ isLoadingDetails: false });
+  listenToAllRestaurantOrders: (restaurantId: string) => {
+    if (!restaurantId) { set({ errorAllOrders: "Restaurant ID required.", isLoadingAllOrders: false }); return; }
+    get().stopListeningToAllRestaurantOrders(restaurantId); 
+    set({ isLoadingAllOrders: true, errorAllOrders: null });
+    const ordersRef = restaurantService.getOrdersFromRestaurantRef(restaurantId);
+    const listener = ordersRef.orderByChild('orderTimestamp').on('value', (snapshot: firebase.database.DataSnapshot) => {
+        const data = snapshot.val();
+        const ordersArray: RestaurantOrder[] = [];
+        if (data) {
+            Object.keys(data).forEach(key => {
+                const orderVal = data[key];
+                ordersArray.push({ 
+                    id: key, key: key,
+                    type: orderVal.type || 'dine-in',
+                    products: orderVal.products || {},
+                    totalPrice: typeof orderVal.totalPrice === 'number' ? orderVal.totalPrice : 0,
+                    orderTimestamp: typeof orderVal.orderTimestamp === 'number' ? orderVal.orderTimestamp : Date.now(),
+                    status: orderVal.status || 'pending',
+                    restaurantId: orderVal.restaurantId || restaurantId,
+                    ...orderVal 
+                });
+            });
+        }
+        set({ allRestaurantOrders: ordersArray.reverse(), isLoadingAllOrders: false });
+      },
+      (errorObject: Error) => {
+        set({ errorAllOrders: errorObject.message, isLoadingAllOrders: false, allRestaurantOrders: [] });
       }
+    );
+    const listenerKey = `allRestaurantOrders_${restaurantId}`;
+    set(state => ({ activeListeners: { ...state.activeListeners, [listenerKey]: () => ordersRef.off('value', listener) } }));
+  },
+  stopListeningToAllRestaurantOrders: (restaurantId: string) => {
+    const listenerKey = `allRestaurantOrders_${restaurantId}`;
+    const activeListener = (get().activeListeners as RestaurantActiveListeners)[listenerKey as keyof RestaurantActiveListeners] as (() => void) | undefined;
+    activeListener?.();
+    set(state => {
+        const newListeners = {...state.activeListeners};
+        delete newListeners[listenerKey as keyof RestaurantActiveListeners];
+        return {activeListeners: newListeners};
+    });
+  },
+  updateRestaurantOrderStatus: async (restaurantId: string, orderId: string, newStatus: RestaurantOrder['status']) => {
+    set({ isLoadingAllOrders: true }); 
+    try {
+        await restaurantService.updateOrderStatus(restaurantId, orderId, newStatus);
+        set(state => ({
+            allRestaurantOrders: state.allRestaurantOrders.map(order => 
+                order.id === orderId ? { ...order, status: newStatus } : order
+            ),
+            isLoadingAllOrders: false
+        }));
     } catch (errorObject: any) {
-      set({ error: errorObject.message || 'Failed to update restaurant.', isLoadingDetails: false });
+        set({ errorAllOrders: errorObject.message || "Failed to update status.", isLoadingAllOrders: false });
     }
   },
-
-  deleteRestaurant: async (id: string) => {
-    set({ isLoadingList: true, isLoadingDetails: true, error: null }); // Indicate loading for both list and details
-    try {
-      await restaurantService.delete(id);
-      // Listener for all restaurants should update the list.
-      // Clear currentRestaurant if it was the one deleted.
-      set(state => ({
-        restaurantsList: state.restaurantsList.filter(r => r.id !== id), // Optimistic update for list
-        currentRestaurant: state.currentRestaurant?.id === id ? null : state.currentRestaurant,
-        currentRestaurantMenu: state.currentRestaurant?.id === id ? null : state.currentRestaurantMenu,
-        isLoadingList: false, // Assuming listener will refresh, or this optimistic update suffices
-        isLoadingDetails: false,
-      }));
-    } catch (errorObject: any) {
-      set({ error: errorObject.message || 'Failed to delete restaurant.', isLoadingList: false, isLoadingDetails: false });
-    }
+  clearError: () => { 
+    set({ error: null, errorMenu: null, errorTableOrders: null, errorAllOrders: null }); 
+  },
+  cleanupAllListeners: () => { 
+    const localListeners = get().activeListeners;
+    Object.values(localListeners).forEach(unsubscribe => {
+        if (typeof unsubscribe === 'function') unsubscribe();
+    });
+    set({ activeListeners: {} });
   },
 
-  // --- Menu Category Actions ---
-  addMenuCategory: async (restaurantId, categoryData) => {
-    set({ isLoadingMenu: true, errorMenu: null });
+  createRestaurant: async (data) => { 
+    set({ isLoadingList: true });
     try {
-        const keys: RestaurantIdParam = { id: restaurantId };
-        const newRef = await restaurantService.addRestaurantMenuCategory(keys, categoryData);
-        // The main restaurant listener should pick up this change.
-        set({ isLoadingMenu: false });
-        return newRef.key;
-    } catch (errorObject: any) {
-        set({ errorMenu: errorObject.message || 'Failed to add menu category.', isLoadingMenu: false });
+        const ref = await restaurantService.create(data);
+        set({ isLoadingList: false });
+        return ref.key;
+    } catch(e: any) {
+        set({ error: e.message, isLoadingList: false });
         return null;
     }
   },
-  updateMenuCategory: async (keys, data) => {
-    set({ isLoadingMenu: true, errorMenu: null });
+  updateRestaurant: async (id, data) => { 
+    set({ isLoadingDetails: true });
+    try {
+        await restaurantService.update(id, data);
+        set(state => ({ 
+            currentRestaurant: state.currentRestaurant?.id === id ? { ...state.currentRestaurant, ...data } : state.currentRestaurant,
+            isLoadingDetails: false 
+        }));
+    } catch(e: any) {
+        set({ error: e.message, isLoadingDetails: false });
+    }
+  },
+  deleteRestaurant: async (id) => { 
+    set({ isLoadingList: true }); 
+    try {
+        await restaurantService.delete(id);
+        set(state => ({
+            restaurantsList: state.restaurantsList.filter(r => r.id !== id),
+            currentRestaurant: state.currentRestaurant?.id === id ? null : state.currentRestaurant,
+            currentRestaurantMenu: state.currentRestaurant?.id === id ? null : state.currentRestaurantMenu,
+            allRestaurantOrders: state.currentRestaurant?.id === id ? [] : state.allRestaurantOrders,
+            isLoadingList: false,
+        }));
+    } catch(e: any) {
+        set({ error: e.message, isLoadingList: false });
+    }
+  },
+  
+  addMenuCategory: async (restaurantId, categoryData) => { 
+    if(!get().currentRestaurant || get().currentRestaurant?.id !== restaurantId) {
+        set({errorMenu: "Restaurant context not loaded for adding category."});
+        return null;
+    }
+    set({ isLoadingMenu: true });
+    try {
+        const ref = await restaurantService.addRestaurantMenuCategory({id: restaurantId}, categoryData);
+        set({ isLoadingMenu: false });
+        return ref.key;
+    } catch(e: any) {
+        set({ errorMenu: e.message, isLoadingMenu: false });
+        return null;
+    }
+  },
+  addMenuSubCategory: async (restaurantId, menuCategoryId, categoryData) => { 
+    if(!get().currentRestaurant || get().currentRestaurant?.id !== restaurantId) {
+        set({errorMenu: "Restaurant context not loaded for adding category."});
+        return null;
+    }
+    set({ isLoadingMenu: true });
+    try {
+        const ref = await restaurantService.addMenuSubCategory(restaurantId, menuCategoryId, categoryData);
+        set({ isLoadingMenu: false });
+        return ref.key;
+    } catch(e: any) {
+        set({ errorMenu: e.message, isLoadingMenu: false });
+        return null;
+    }
+  },
+  updateMenuCategory: async (keys, data) => { 
+    set({ isLoadingMenu: true });
     try {
         await restaurantService.editRestaurantMenuCategory(keys, data);
         set({ isLoadingMenu: false });
-    } catch (errorObject: any) {
-        set({ errorMenu: errorObject.message || 'Failed to update menu category.', isLoadingMenu: false });
+    } catch(e: any) {
+        set({ errorMenu: e.message, isLoadingMenu: false });
     }
   },
-  deleteMenuCategory: async (keys) => {
-    set({ isLoadingMenu: true, errorMenu: null });
+  deleteMenuCategory: async (keys) => { 
+    set({ isLoadingMenu: true });
     try {
         await restaurantService.deleteRestaurantMenuCategory(keys);
         set({ isLoadingMenu: false });
-    } catch (errorObject: any) {
-        set({ errorMenu: errorObject.message || 'Failed to delete menu category.', isLoadingMenu: false });
+    } catch(e: any) {
+        set({ errorMenu: e.message, isLoadingMenu: false });
+    }
+  },
+  deleteMenuSubCategory: async (keys) => { 
+    set({ isLoadingMenu: true });
+    try {
+        await restaurantService.deleteMenuSubCategory(keys);
+        set({ isLoadingMenu: false });
+    } catch(e: any) {
+        set({ errorMenu: e.message, isLoadingMenu: false });
     }
   },
 
-  // --- Menu Item Actions ---
-  addMenuItem: async (keys, itemData) => {
-    set({ isLoadingMenu: true, errorMenu: null });
+  addMenuItem: async (keys, itemData, image) => { 
+    set({ isLoadingMenu: true });
     try {
-        const newRef = await restaurantService.addRestaurantMenuItem(keys, itemData);
+        if (image !== null){
+          itemData.icon = await restaurantService.uploadMenuItemImage(keys, image)
+        }
+        console.log(itemData,image)
+        const ref = await restaurantService.addRestaurantMenuItem(keys, itemData);
         set({ isLoadingMenu: false });
-        return newRef.key;
-    } catch (errorObject: any) {
-        set({ errorMenu: errorObject.message || 'Failed to add menu item.', isLoadingMenu: false });
+        return ref.key;
+    } catch(e: any) {
+        set({ errorMenu: e.message, isLoadingMenu: false });
         return null;
     }
   },
-  updateMenuItem: async (keys, itemData) => {
-    set({ isLoadingMenu: true, errorMenu: null });
+  updateMenuItem: async (keys, itemData, image) => { 
+    set({ isLoadingMenu: true });
     try {
+        if (image !== null){
+          itemData.icon = await restaurantService.uploadMenuItemImage(keys, image)
+        }
         await restaurantService.editRestaurantMenuItem(keys, itemData);
         set({ isLoadingMenu: false });
-    } catch (errorObject: any) {
-        set({ errorMenu: errorObject.message || 'Failed to update menu item.', isLoadingMenu: false });
+    } catch(e: any) {
+        set({ errorMenu: e.message, isLoadingMenu: false });
     }
   },
-  deleteMenuItem: async (keys) => {
-    set({ isLoadingMenu: true, errorMenu: null });
+  deleteMenuItem: async (keys) => { 
+    set({ isLoadingMenu: true });
     try {
         await restaurantService.deleteRestaurantMenuItem(keys);
         set({ isLoadingMenu: false });
-    } catch (errorObject: any) {
-        set({ errorMenu: errorObject.message || 'Failed to delete menu item.', isLoadingMenu: false });
+    } catch(e: any) {
+        set({ errorMenu: e.message, isLoadingMenu: false });
     }
   },
 
-  // --- Table Order Actions ---
-  addTableOrder: async (keys, orderData) => {
-    set({ isLoadingTableOrders: true, errorTableOrders: null }); // Use specific loading/error state
+  addTableOrder: async (keys, orderData) => { 
+    set({ isLoadingTableOrders: true });
     try {
-        const newRef = await restaurantService.addOrderToTable(keys, orderData);
+        const ref = await restaurantService.addOrderToTable(keys, orderData);
         set({ isLoadingTableOrders: false });
-        return newRef.key;
-    } catch (errorObject: any) {
-        set({ errorTableOrders: errorObject.message || 'Failed to add table order.', isLoadingTableOrders: false });
+        return ref.key;
+    } catch(e: any) {
+        set({ errorTableOrders: e.message, isLoadingTableOrders: false });
         return null;
     }
   },
-  updateTableOrder: async (keys, orderData) => {
-    set({ isLoadingTableOrders: true, errorTableOrders: null });
+  updateTableOrder: async (keys, orderData) => { 
+    set({ isLoadingTableOrders: true });
     try {
         await restaurantService.updateTableOrder(keys, orderData);
         set({ isLoadingTableOrders: false });
-    } catch (errorObject: any) {
-        set({ errorTableOrders: errorObject.message || 'Failed to update table order.', isLoadingTableOrders: false });
+    } catch(e: any) {
+        set({ errorTableOrders: e.message, isLoadingTableOrders: false });
     }
   },
-  clearTableOrders: async (keys) => {
-    set({ isLoadingTableOrders: true, errorTableOrders: null });
+  clearTableOrders: async (keys) => { 
+    set({ isLoadingTableOrders: true });
     try {
         await restaurantService.clearTableOrders(keys);
-        // Listener for table orders should pick this up, or optimistically clear local state
-        if(get().currentRestaurant?.id === keys.id && get().currentTableOrders) {
-            set(state => ({
-                currentTableOrders: null // Or set to {} if that's the expected empty state
-            }));
-        }
-        set({ isLoadingTableOrders: false });
-    } catch (errorObject: any) {
-        set({ errorTableOrders: errorObject.message || 'Failed to clear table orders.', isLoadingTableOrders: false });
+        set({ isLoadingTableOrders: false, currentTableOrders: null }); 
+    } catch(e: any) {
+        set({ errorTableOrders: e.message, isLoadingTableOrders: false });
     }
   },
-  listenToTableOrders: (keys: RestaurantTablePathKeys) => {
+  listenToTableOrders: (keys) => { 
     get().stopListeningToTableOrders(keys.id, keys.tableId); 
     set({ isLoadingTableOrders: true, errorTableOrders: null, currentTableOrders: null });
     const dbRef = restaurantService.getTableOrders(keys);
-    const listener = dbRef.on(
-        'value',
-        (snapshot) => {
-            const ordersData = snapshot.val() as Record<string, TableOrder> | null;
-            set({ currentTableOrders: ordersData || {}, isLoadingTableOrders: false });
-        },
-        (errorObject: Error) => {
-            console.error(`Error listening to orders for table ${keys.tableId}:`, errorObject);
-            set({ errorTableOrders: errorObject.message, isLoadingTableOrders: false });
-        }
+    const listener = dbRef.on('value', (snapshot: firebase.database.DataSnapshot) => {
+        const ordersData = snapshot.val() as Record<string, TableOrder> | null;
+        set({ currentTableOrders: ordersData || {}, isLoadingTableOrders: false });
+      },
+      (errorObject: Error) => {
+        set({ errorTableOrders: errorObject.message, isLoadingTableOrders: false });
+      }
     );
     const listenerKey = `tableOrders_${keys.id}_${keys.tableId}`;
     set(state => ({ activeListeners: { ...state.activeListeners, [listenerKey]: () => dbRef.off('value', listener) } }));
   },
-  stopListeningToTableOrders: (restaurantId: string, tableId: string) => {
+  stopListeningToTableOrders: (restaurantId, tableId) => { 
     const listenerKey = `tableOrders_${restaurantId}_${tableId}`;
-    const activeListener = get().activeListeners[listenerKey as keyof ActiveListeners] as (() => void) | undefined;
+    const activeListener = (get().activeListeners as RestaurantActiveListeners)[listenerKey as keyof RestaurantActiveListeners] as (() => void) | undefined;
     activeListener?.();
     set(state => {
-        const newListeners = { ...state.activeListeners };
-        delete newListeners[listenerKey as keyof ActiveListeners];
-        return { activeListeners: newListeners /*, currentTableOrders: null */ }; // Optionally clear orders
+        const newListeners = {...state.activeListeners};
+        delete newListeners[listenerKey as keyof RestaurantActiveListeners];
+        return {activeListeners: newListeners};
     });
   },
-
-  // --- Restaurant Order Actions ---
-  addRestaurantOrder: async (restaurantId, orderData) => {
-    // Assuming this might use a general loading state or a specific one if many order types
-    set({ isLoadingDetails: true, error: null }); 
+  addRestaurantOrder: async (restaurantId, orderData) => { 
+    set({ isLoadingDetails: true }); 
     try {
-        const newRef = await restaurantService.addOrderToRestaurant({id: restaurantId}, orderData);
-        // Main restaurant listener should pick this up if 'orders' is part of Restaurant object
+        const ref = await restaurantService.addOrderToRestaurant({id: restaurantId}, orderData);
         set({ isLoadingDetails: false });
-        return newRef.key;
-    } catch (errorObject: any) {
-        set({ error: errorObject.message || 'Failed to add restaurant order.', isLoadingDetails: false });
+        return ref.key;
+    } catch(e: any) {
+        set({ error: e.message, isLoadingDetails: false }); 
         return null;
     }
   },
-
-  clearError: () => {
-    set({ error: null, errorMenu: null, errorTableOrders: null });
-  },
-
-  cleanupAllListeners: () => {
-    const listeners = get().activeListeners;
-    Object.values(listeners).forEach(unsubscribe => {
-        if (typeof unsubscribe === 'function') {
-            unsubscribe();
-        }
-    });
-    set({ activeListeners: {} });
-  }
 }));

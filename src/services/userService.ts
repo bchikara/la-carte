@@ -1,11 +1,11 @@
 // src/services/userService.ts
 
-import { auth, database, storage } from '../config/firebaseConfig'; // Ensure storage is imported
+import { auth, database, storage } from '../config/firebaseConfig'; // Ensure storage is imported if used by other functions
 import { UserProfile, Order, UserOrdersFirebase, OrderProduct } from '../types/user.types'; 
 import firebase from 'firebase/compat/app'; 
 
 const usersRef = database.ref('/users');
-const profileImagesRef = storage.ref('profileImages'); // Base path for profile images
+// const profileImagesRef = storage.ref('profileImages'); // Keep if uploadProfileImage is used
 
 /**
  * Gets the current Firebase authenticated user's UID.
@@ -21,7 +21,7 @@ export const getCurrentUserId = (): string | null => {
 export const fetchUserDetailsFromDb = async (uid: string): Promise<UserProfile | null> => {
   try {
     const snapshot = await usersRef.child(uid).once('value');
-    return snapshot.exists() ? { key: snapshot.key, ...snapshot.val() } as UserProfile : null;
+    return snapshot.exists() ? { key: snapshot.key!, ...snapshot.val() } as UserProfile : null;
   } catch (error) {
     console.error("Error fetching user details:", error);
     throw error;
@@ -44,7 +44,6 @@ export const signOut = async (): Promise<void> => {
 
 /**
  * Adds or updates user details in Firebase Realtime Database.
- * Typically for initial setup.
  */
 export const addUserDetailsToDb = async (uid: string, phone: string, details?: Partial<UserProfile>): Promise<void> => {
   try {
@@ -54,12 +53,12 @@ export const addUserDetailsToDb = async (uid: string, phone: string, details?: P
       restaurantId: details?.restaurantId || null,
       phone: phone,
       orders: details?.orders || {}, 
-      displayName: auth.currentUser?.displayName || details?.displayName || phone, // Default display name to phone if not available
+      displayName: auth.currentUser?.displayName || details?.displayName || phone,
       email: auth.currentUser?.email || details?.email || null,
       profileImageUrl: details?.profileImageUrl || null,
       ...details,
     };
-    await usersRef.child(uid).set(userProfileData); // Use set for initial creation to ensure all base fields
+    await usersRef.child(uid).set(userProfileData); 
   } catch (error) {
     console.error("Error adding/updating user details:", error);
     throw error;
@@ -68,11 +67,9 @@ export const addUserDetailsToDb = async (uid: string, phone: string, details?: P
 
 /**
  * Uploads a profile image for a user to Firebase Storage.
- * @param uid - The user's ID.
- * @param file - The image file to upload.
- * @returns A promise that resolves to the download URL of the uploaded image.
  */
 export const uploadProfileImage = async (uid: string, file: File): Promise<string> => {
+    const profileImagesRef = storage.ref('profileImages'); // Define here or ensure it's accessible
     try {
         const fileRef = profileImagesRef.child(`${uid}/${file.name}_${Date.now()}`);
         const snapshot = await fileRef.put(file);
@@ -85,9 +82,7 @@ export const uploadProfileImage = async (uid: string, file: File): Promise<strin
 };
 
 /**
- * Updates specific fields (displayName, profileImageUrl) in the user's profile in Firebase Realtime Database.
- * @param uid - The user's ID.
- * @param dataToUpdate - An object containing displayName and/or profileImageUrl.
+ * Updates specific fields in the user's profile in Firebase Realtime Database.
  */
 export const updateUserProfileFieldsInDb = async (
     uid: string, 
@@ -95,7 +90,6 @@ export const updateUserProfileFieldsInDb = async (
 ): Promise<void> => {
     try {
         if (Object.keys(dataToUpdate).length === 0) {
-            console.warn("updateUserProfileFieldsInDb called with no data to update.");
             return;
         }
         await usersRef.child(uid).update(dataToUpdate);
@@ -108,6 +102,7 @@ export const updateUserProfileFieldsInDb = async (
 
 /**
  * Adds a new order to a user's profile in Firebase.
+ * orderData should contain all necessary fields for an Order except 'key' and 'orderId'.
  */
 export const addUserOrderToDb = async (uid: string, orderData: Omit<Order, 'key' | 'orderId'>): Promise<string | null> => {
   try {
@@ -117,22 +112,31 @@ export const addUserOrderToDb = async (uid: string, orderData: Omit<Order, 'key'
     if (!newOrderId) {
       throw new Error("Failed to get new order key from Firebase.");
     }
+
+    // Construct fullOrderData ensuring all required fields from the Order type are present
+    // and correctly sourced from orderData.
     const fullOrderData: Order = {
       key: newOrderId, 
       orderId: newOrderId, 
-      products: orderData.products, 
-      time: orderData.time,         
-      totalPrice: orderData.totalPrice, 
-      totalAmount: orderData.totalAmount, 
-      orderDate: orderData.orderDate, 
+      products: orderData.products, // This must be Record<string, OrderProduct>
+      time: orderData.time,         // This must be a number (timestamp)
+      totalPrice: orderData.totalPrice, // This must be a number
+      totalAmount: orderData.totalPrice, // This must be a number
+      orderDate: orderData.time,   // This must be string | number
       status: orderData.status || 'pending',
-      restaurantId: orderData.restaurantId, 
+      restaurantId: orderData.restaurantId, // This must be provided in orderData
+      
+      // Optional fields from orderData that are also in Order type
       restaurantName: orderData.restaurantName,
       table: orderData.table,
       paymentId: orderData.paymentId,
       paymentStatus: orderData.paymentStatus,
-      ...(orderData as Partial<Order>), 
+      // If 'items' was a mistake and 'products' is the correct field in Order type, this spread is safer.
+      // Ensure orderData doesn't have conflicting 'items' if 'products' is the source of truth.
+      ...(orderData as Partial<Omit<Order, 'key' | 'orderId' | 'products' | 'time' | 'totalPrice' | 'totalAmount' | 'orderDate' | 'status' | 'restaurantId'>>),
     };
+
+    console.log('user order','adding',fullOrderData)
     await newOrderRef.set(fullOrderData);
     return newOrderId;
   } catch (error) {
@@ -143,6 +147,7 @@ export const addUserOrderToDb = async (uid: string, orderData: Omit<Order, 'key'
 
 /**
  * Fetches all orders for a given user from Firebase.
+ * Returns the raw structure as stored in Firebase (UserOrdersFirebase).
  */
 export const fetchUserOrdersFromDb = async (uid: string): Promise<UserOrdersFirebase | null> => {
   try {

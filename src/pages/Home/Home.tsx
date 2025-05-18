@@ -188,7 +188,7 @@ const Landingpage: React.FC = () => {
                             </p>
                         </div>
                         <div className="app-cta-buttons">
-                            <button className="cta-button primary large" onClick={() => handleNavigation('/download-app')}>Download App</button>
+                            {/* <button className="cta-button primary large" onClick={() => handleNavigation('/download-app')}>Download App</button> */}
                             <button className="cta-button secondary large" onClick={() => handleNavigation('/about')}>Partner With Us</button>
                         </div>
                     </div>

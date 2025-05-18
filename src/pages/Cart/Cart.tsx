@@ -7,8 +7,6 @@ import { useRestaurantStore } from '../../store/restaurantStore';
 import { useUserStore } from '../../store/userStore';      
 import { usePaymentStore } from '../../store/paymentStore'; // New Payment Store
 import { CartItem } from '../../types/cart.types';          
-// import { Restaurant } from '../../types/restaurant.types'; // Not directly needed if currentRestaurant from store is used
-     
 import DeleteIcon from '../../assets/icons/delete.svg';         
 
 import './Cart.scss';

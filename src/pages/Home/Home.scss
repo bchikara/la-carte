@@ -109,64 +109,66 @@ $watermark-url: '/assets/icons/watermark.svg'; // Define watermark path once
 }
 
 // --- CTA Button Styles (Reusable) ---
-.cta-button {
-  padding: 0.8rem 1.8rem;
-  font-size: 0.9rem;
-  font-weight: 600;
-  border-radius: 50px; // Fully rounded
-  cursor: pointer;
-  transition: all 0.3s ease;
-  text-decoration: none;
-  display: inline-block;
-  border: 2px solid transparent;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  min-width: 180px;
-  text-align: center;
-  position: relative; // For z-index if needed over watermarks
-  z-index: 1;
-
-  &.primary {
-    background: $primary-gradient;
-    color: $light-text-color;
-    &:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 7px 14px rgba($primary-color-start, 0.3), 0 3px 6px rgba(0, 0, 0, 0.08);
-    }
-  }
-
-  &.secondary {
-    background-color: transparent;
-    color: $light-text-color; // For use on dark backgrounds like hero
-    border-color: $light-text-color;
-    &:hover {
-      background-color: $light-text-color;
-      color: $primary-color-end;
-      transform: translateY(-3px);
-      box-shadow: 0 7px 14px rgba($light-text-color, 0.2), 0 3px 6px rgba(0, 0, 0, 0.08);
-    }
-  }
+.Home{
+  .cta-button {
+    padding: 0.8rem 1.8rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    border-radius: 50px; // Fully rounded
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-block;
+    border: 2px solid transparent;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    min-width: 180px;
+    text-align: center;
+    position: relative; // For z-index if needed over watermarks
+    z-index: 1;
   
-  &.tertiary { // For cards or lighter backgrounds
-    background-color: transparent;
-    color: $primary-color-end;
-    border-color: $primary-color-end;
-    &:hover {
-      background-color: $primary-color-end;
+    &.primary {
+      background: $primary-gradient;
       color: $light-text-color;
-      transform: translateY(-3px);
-      box-shadow: 0 7px 14px rgba($primary-color-end, 0.2), 0 3px 6px rgba(0, 0, 0, 0.08);
+      &:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 7px 14px rgba($primary-color-start, 0.3), 0 3px 6px rgba(0, 0, 0, 0.08);
+      }
     }
-  }
-
-  &.large {
-    padding: 1rem 2.2rem;
-    font-size: 1rem;
-  }
-
-  @media (min-width: 768px) {
-    padding: 0.9rem 2rem;
-    font-size: 1rem;
+  
+    &.secondary {
+      background-color: transparent !important;
+      color: $light-text-color !important; // For use on dark backgrounds like hero
+      border-color: $light-text-color !important;
+      &:hover {
+        background-color: $light-text-color;
+        color: $primary-color-end;
+        transform: translateY(-3px);
+        box-shadow: 0 7px 14px rgba($light-text-color, 0.2), 0 3px 6px rgba(0, 0, 0, 0.08);
+      }
+    }
+    
+    &.tertiary { // For cards or lighter backgrounds
+      background-color: transparent;
+      color: $primary-color-end;
+      border-color: $primary-color-end;
+      &:hover {
+        background-color: $primary-color-end;
+        color: $light-text-color;
+        transform: translateY(-3px);
+        box-shadow: 0 7px 14px rgba($primary-color-end, 0.2), 0 3px 6px rgba(0, 0, 0, 0.08);
+      }
+    }
+  
+    &.large {
+      padding: 1rem 2.2rem;
+      font-size: 1rem;
+    }
+  
+    @media (min-width: 768px) {
+      padding: 0.9rem 2rem;
+      font-size: 1rem;
+    }
   }
 }
 

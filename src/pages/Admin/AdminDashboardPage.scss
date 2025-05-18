@@ -1,0 +1,144 @@
+// src/pages/Admin/admin-dashboard-page.scss
+
+// Assuming variables like $admin-primary-accent, $admin-content-bg, $dark-text-color, etc.
+// are available from a global scope or admin-layout.scss if imported there.
+// For this example, I'll redefine some key ones for clarity.
+$admin-primary-accent: #ffbc36;
+$admin-content-bg: #f4f6f8;
+$dark-text-color: #202124;
+$secondary-text-color: #5f6368;
+$card-bg: #ffffff;
+$card-shadow: 0 2px 10px rgba(0,0,0,0.07);
+$border-radius: 8px;
+$font-family-headings: 'Montserrat', 'Arial', sans-serif;
+$font-family-main: 'Roboto', 'Arial', sans-serif;
+
+.admin-dashboard-page {
+  padding: 1rem; // Padding within the main content area of AdminLayout
+  font-family: $font-family-main;
+
+  .dashboard-header {
+    margin-bottom: 2rem;
+    h1 {
+      font-family: $font-family-headings;
+      font-size: 1.8rem;
+      color: $dark-text-color;
+      font-weight: 600;
+      margin: 0 0 0.25rem 0;
+    }
+    p {
+      font-size: 1rem;
+      color: $secondary-text-color;
+    }
+    @media (min-width: 768px) {
+        h1 { font-size: 2.2rem; }
+        p { font-size: 1.1rem; }
+    }
+  }
+
+  .dashboard-quick-actions {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2.5rem;
+
+    .action-card {
+      background-color: $card-bg;
+      padding: 1.5rem 1rem;
+      border-radius: $border-radius;
+      box-shadow: $card-shadow;
+      text-align: center;
+      text-decoration: none;
+      color: $dark-text-color;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+
+      svg {
+        font-size: 2rem;
+        color: $admin-primary-accent;
+        margin-bottom: 0.5rem;
+      }
+      span {
+        font-weight: 500;
+        font-size: 0.95rem;
+      }
+      &:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+      }
+    }
+  }
+
+  .dashboard-orders-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2rem;
+
+    @media (min-width: 992px) {
+      grid-template-columns: 1fr 1fr; // Two columns for new and recent orders
+    }
+  }
+
+  .orders-column {
+    background-color: lighten($admin-content-bg, 2%); // Slightly different bg for columns
+    border-radius: $border-radius;
+    padding: 1.5rem;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+
+    h2 {
+      font-family: $font-family-headings;
+      font-size: 1.3rem;
+      color: $dark-text-color;
+      font-weight: 600;
+      margin: 0 0 1.5rem 0;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid darken($admin-content-bg, 5%);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      svg { color: $admin-primary-accent; }
+    }
+    .no-orders-message {
+        text-align: center;
+        color: $secondary-text-color;
+        padding: 2rem 0;
+        font-style: italic;
+    }
+  }
+  
+  .orders-scroll-container {
+    max-height: 400px; // Limit height and make scrollable
+    overflow-y: auto;
+    padding-right: 0.5rem; // For scrollbar
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+
+    // Custom scrollbar (optional)
+    &::-webkit-scrollbar {
+      width: 6px;
+    }
+    &::-webkit-scrollbar-track {
+      background: lighten($admin-content-bg, 5%);
+      border-radius: 3px;
+    }
+    &::-webkit-scrollbar-thumb {
+      background: darken($admin-content-bg, 15%);
+      border-radius: 3px;
+      &:hover {
+        background: darken($admin-content-bg, 20%);
+      }
+    }
+  }
+
+  .admin-loading-state, .admin-error-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    font-size: 1.1rem;
+    color: $secondary-text-color;
+  }
+}

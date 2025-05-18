@@ -1,0 +1,113 @@
+// src/components/Admin/order-summary-card.scss
+
+$card-bg: #ffffff;
+$border-color: #e0e0e0;
+$text-color-dark: #333;
+$text-color-light: #777;
+$primary-accent: #ffbc36; // Your theme color
+$status-pending-bg: #ffeb3b; // Yellowish
+$status-pending-text: #8d6e63;
+$status-confirmed-bg: #81d4fa; // Light Blue
+$status-confirmed-text: #01579b;
+$status-preparing-bg: #ffcc80; // Light Orange
+$status-preparing-text: #e65100;
+$status-served-bg: #a5d6a7; // Light Green
+$status-served-text: #1b5e20;
+$status-completed-bg: #c5e1a5; // Lighter Green
+$status-completed-text: #33691e;
+$status-paid-bg: #4caf50; // Darker Green
+$status-paid-text: #ffffff;
+$status-cancelled-bg: #ef9a9a; // Light Red
+$status-cancelled-text: #c62828;
+
+
+.order-summary-card {
+  background-color: $card-bg;
+  border: 1px solid $border-color;
+  border-radius: 8px;
+  padding: 0.9rem 1rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  transition: box-shadow 0.2s ease;
+  font-size: 0.85rem;
+
+  &:hover {
+    box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+  }
+
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.6rem;
+    padding-bottom: 0.6rem;
+    border-bottom: 1px dashed lighten($border-color, 5%);
+
+    .order-id {
+      font-weight: 600;
+      color: $text-color-dark;
+      font-size: 0.9rem;
+    }
+    .order-meta {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: $text-color-light;
+        font-size: 0.8rem;
+        svg {
+            font-size: 1em; // Relative to text
+            opacity: 0.8;
+        }
+    }
+    .order-table {
+      font-weight: 500;
+    }
+  }
+
+  .order-status-badge {
+    padding: 0.2rem 0.6rem;
+    border-radius: 15px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: capitalize;
+    
+    &.status-pending, &.status-pending_payment { background-color: $status-pending-bg; color: $status-pending-text; }
+    &.status-confirmed { background-color: $status-confirmed-bg; color: $status-confirmed-text; }
+    &.status-preparing { background-color: $status-preparing-bg; color: $status-preparing-text; }
+    &.status-served { background-color: $status-served-bg; color: $status-served-text; }
+    &.status-completed { background-color: $status-completed-bg; color: $status-completed-text; }
+    &.status-paid { background-color: $status-paid-bg; color: $status-paid-text; }
+    &.status-cancelled { background-color: $status-cancelled-bg; color: $status-cancelled-text; }
+    // Add more statuses as needed
+  }
+
+  .card-body {
+    margin-bottom: 0.6rem;
+    .product-preview {
+      color: $text-color-light;
+      font-style: italic;
+      margin-bottom: 0.3rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .order-time {
+      color: $text-color-light;
+      font-size: 0.8rem;
+    }
+  }
+
+  .card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 0.6rem;
+    border-top: 1px dashed lighten($border-color, 5%);
+
+    .total-amount {
+      font-weight: 700;
+      font-size: 1rem;
+      color: $primary-accent;
+    }
+    // .action-btn { ... } // Styles for action buttons if added
+  }
+}

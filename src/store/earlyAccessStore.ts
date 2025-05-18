@@ -9,6 +9,7 @@ import firebase from 'firebase/compat/app';
 interface EarlyAccessFormState {
   contactName: string;
   restaurantName: string;
+  restaurantGST:string;
   phone: string;
   email: string;
   message?: string;
@@ -28,6 +29,7 @@ interface EarlyAccessStoreState {
 const initialFormFields: EarlyAccessFormState = {
   contactName: '',
   restaurantName: '',
+  restaurantGST:'',
   phone: '',
   email: '',
   message: '',
@@ -90,6 +92,7 @@ export const useEarlyAccessStore = create<EarlyAccessStore>((set, get) => ({
       const submissionData = {
         contactName: formState.contactName,
         restaurantName: formState.restaurantName,
+        restaurantGST: formState.restaurantGST || '',
         phone: formState.phone,
         email: formState.email,
         message: formState.message,

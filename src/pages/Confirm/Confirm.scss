@@ -1,0 +1,151 @@
+// src/pages/Confirm/confirm.scss
+
+// --- Variables & Mixins (Ensure consistency with your theme) ---
+$primary-color-start: #ffbc36;
+$primary-color-end: #e08f00;
+$primary-gradient: linear-gradient(135deg, $primary-color-start 0%, $primary-color-end 100%);
+$secondary-color: #5f6368;
+$light-text-color: #ffffff;
+$dark-text-color: #202124;
+$success-color: #4CAF50; // Green for confirmation
+$background-page: #f8f9fa;
+$font-family-main: 'Roboto', 'Arial', sans-serif;
+$font-family-headings: 'Montserrat', 'Arial', sans-serif;
+$watermark-url: '/assets/icons/watermark.svg';
+$border-radius-main: 12px;
+
+@mixin section-padding {
+  padding: 2rem 1rem;
+  position: relative;
+  @media (min-width: 768px) { padding: 3rem 1.5rem; }
+}
+
+@mixin subtle-watermark($opacity: 0.015, $z-index: -1, $filter: grayscale(100%) contrast(0.5) brightness(1.5)) {
+  content: '';
+  position: fixed;
+  top: 0; bottom: 0; left: 0; right: 0;
+  background: url($watermark-url) no-repeat center center / cover;
+  opacity: $opacity;
+  z-index: $z-index;
+  pointer-events: none;
+  filter: $filter;
+}
+
+.section-title {
+  font-family: $font-family-headings;
+  font-size: 2rem; font-weight: 700; color: $primary-color-end;
+  text-align: center; margin-bottom: 1rem; position: relative; z-index: 1;
+  @media (min-width: 768px) { font-size: 2.5rem; margin-bottom: 1.5rem;}
+}
+
+.cta-button {
+  padding: 0.75rem 1.75rem; font-size: 0.95rem; font-weight: 500;
+  font-family: $font-family-main;
+  border-radius: 25px; cursor: pointer; transition: all 0.2s ease-out;
+  text-decoration: none; display: inline-flex; align-items: center; justify-content: center;
+  border: 1px solid transparent; text-transform: none; letter-spacing: 0.1px;
+  min-width: 160px; line-height: 1.5;
+  
+  &.primary { 
+    background: $primary-gradient; color: $light-text-color; border-color: $primary-color-end;
+    &:hover { box-shadow: 0 2px 4px rgba(0,0,0,0.15), 0 1px 2px rgba(0,0,0,0.1); filter: brightness(1.05); }
+  }
+  &.secondary {
+    background-color: transparent; color: $primary-color-end; border-color: $primary-color-end;
+    &:hover { background-color: lighten($primary-color-start, 40%); }
+  }
+}
+// --- End of Base Styles ---
+
+.ConfirmPage {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: $background-page;
+  font-family: $font-family-main;
+  position: relative;
+  color: $dark-text-color;
+
+  &::before { // Page-level watermark
+    @include subtle-watermark();
+  }
+
+  .confirm-content-wrapper {
+    flex-grow: 1;
+    width: 100%;
+    max-width: 600px; 
+    margin: 0 auto; 
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center; 
+    text-align: center;
+    position: relative;
+    z-index: 1;
+  }
+
+  .confirm-icon-container {
+    margin-bottom: 1.5rem;
+    .confirm-icon {
+      width: 80px; // Adjust size as needed
+      height: 80px;
+      // If it's an SVG, you can use fill: $success-color;
+      // For PNG, ensure the icon itself is appropriately colored or use a filter
+      // filter: hue-rotate(90deg) saturate(5); // Example to make an orange icon greenish
+      @media (min-width: 768px) {
+        width: 100px;
+        height: 100px;
+      }
+    }
+  }
+
+  .confirm-heading { // Uses .section-title styles
+    color: $success-color; // Confirmation green
+    font-size: 2rem;
+    margin-bottom: 0.75rem;
+     @media (min-width: 768px) {
+        font-size: 2.5rem;
+    }
+  }
+
+  .confirm-text {
+    font-size: 1.1rem;
+    color: $secondary-color;
+    line-height: 1.6;
+    margin-bottom: 1rem;
+    @media (min-width: 768px) {
+        font-size: 1.2rem;
+    }
+  }
+
+  .confirm-redirect-timer {
+    font-size: 0.9rem;
+    color: lighten($secondary-color, 10%);
+    margin-bottom: 2rem;
+  }
+
+  .confirm-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    width: 100%;
+    max-width: 350px; // Max width for buttons container
+
+    @media (min-width: 480px) {
+      flex-direction: row;
+      justify-content: center;
+    }
+
+    .cta-button {
+      width: 100%; // Buttons take full width of their container on small screens
+      @media (min-width: 480px) {
+        width: auto; // Auto width for row layout
+      }
+    }
+  }
+
+  // Placeholder for the old watermark div, not needed if applied to wrapper
+  .la-costa-fixed-watermark-placeholder {
+    display: none; 
+  }
+}

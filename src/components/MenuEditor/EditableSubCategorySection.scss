@@ -1,0 +1,111 @@
+// src/components/Admin/MenuEditor/editable-sub-category-section.scss
+
+// Assuming admin theme variables are available
+$admin-primary-accent: #ffbc36;
+$dark-text-color: #202124;
+$secondary-text-color: #5f6368;
+$card-bg: #ffffff; // Or a slightly off-white for sub-sections
+$border-radius-inner: 6px; // Slightly smaller radius for nested items
+$border-color: #e0e0e0;
+$font-family-headings: 'Montserrat', 'Arial', sans-serif;
+
+.editable-sub-category-section {
+  background-color: $card-bg; // White background for sub-category block
+  border-radius: $border-radius-inner;
+  padding: 0.75rem 1rem;
+  border: 1px solid lighten($border-color, 5%);
+  // box-shadow: 0 1px 3px rgba(0,0,0,0.03); // Very subtle shadow
+
+  .subcategory-section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid $border-color;
+    cursor: pointer;
+
+    .subcategory-name-toggle {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      flex-grow: 1;
+
+      .toggle-icon {
+        font-size: 0.8rem;
+        color: $secondary-text-color;
+        transition: transform 0.2s ease-in-out;
+      }
+
+      h3 {
+        font-family: $font-family-headings;
+        font-size: 1.1rem; // Slightly smaller than main category
+        color: $dark-text-color;
+        font-weight: 500;
+        margin: 0;
+      }
+    }
+  }
+
+  .subcategory-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem; // Slightly smaller gap
+    flex-shrink: 0;
+
+    // Uses .admin-icon-button from editable-category-section.scss
+    // If that's not imported globally, define it here or import.
+    // For now, assuming .admin-icon-button styles are available.
+    .admin-icon-button {
+        padding: 0.3rem 0.6rem; // Slightly smaller buttons
+        font-size: 0.8rem;
+        svg { font-size: 0.9em; }
+    }
+  }
+
+  .products-list-container {
+    padding: 0.5rem 0; // Padding for the list of products
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem; // Space between product list items
+
+    &.no-header { // When subcategory header is not rendered
+        padding-top: 0;
+    }
+  }
+
+  .no-products-message {
+    font-size: 0.85rem;
+    color: $secondary-text-color;
+    padding: 0.75rem 0;
+    text-align: center;
+    font-style: italic;
+
+    .add-link {
+        color: $admin-primary-accent;
+        font-weight: 500;
+        cursor: pointer;
+        text-decoration: underline;
+        margin-left: 0.3rem;
+        &:hover {
+            color: darken($admin-primary-accent, 10%);
+        }
+    }
+  }
+  
+  .add-product-footer-action {
+    margin-top: 0.5rem;
+    text-align: right; // Or center, depending on preference
+    .admin-cta-button.subtle { // A less prominent add button
+        background-color: transparent;
+        color: $admin-primary-accent;
+        border: 1px dashed $admin-primary-accent;
+        padding: 0.4rem 0.8rem;
+        font-size: 0.85rem;
+        &:hover {
+            background-color: lighten($admin-primary-accent, 40%);
+            border-style: solid;
+        }
+    }
+  }
+}

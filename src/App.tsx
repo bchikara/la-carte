@@ -23,7 +23,10 @@ import { initializeAuthListener, cleanupAuthListener, useUserStore } from './sto
 import Cart from './pages/Cart/Cart';
 import Profile from './pages/Profile/Profile';
 import Orders from './pages/Orders/Orders';
-
+import AdminRoute from './components/RestaurantRoute/RestaurantRoute';
+import AdminDashboardPage from './pages/Admin/AdminDashboardPage';
+import AdminMenuEditorPage from './pages/MenuEditor/MenuEditor';
+import Confirm from './pages/Confirm/Confirm';
 
 function App() {
   // Initialize Firebase auth listener when App mounts
@@ -79,6 +82,18 @@ function App() {
           <Route path="/my-orders" element={<ProtectedRoute />}>
             <Route index element={<Orders />} />
           </Route>
+
+          <Route path="/confirm/:restaurantId" element={<ProtectedRoute />}>
+            <Route index element={<Confirm />} />
+          </Route>
+
+          <Route path='/admin/restaurant/:restaurantId/dashboard' element={<AdminDashboardPage/>}>
+          </Route>
+
+          <Route path='/admin/restaurant/:restaurantId/menu' element={<AdminMenuEditorPage/>}>
+          </Route>
+
+
          
 
           {/* Fallback for non-matched routes */}
