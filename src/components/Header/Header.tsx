@@ -31,7 +31,7 @@ const Header: React.FC = () => {
         // Navigate to a profile page or open a profile dropdown
         // For admin users, this could navigate to an admin dashboard
         if (currentUser?.isAdmin && currentUser.restaurantId) {
-            handleNavigate(`/admin/restaurant/${currentUser.restaurantId}/dashboard`);
+            handleNavigate(`/admin/restaurant/${currentUser.restaurantId}/`);
         } else {
             handleNavigate('/profile'); // General user profile page
         }

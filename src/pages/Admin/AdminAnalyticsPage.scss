@@ -1,0 +1,203 @@
+// src/pages/Admin/admin-analytics-page.scss
+
+// Assuming admin theme variables are available
+$admin-primary-accent: #ffbc36;
+$admin-primary-dark: #e08f00;
+$admin-content-bg: #f4f6f8;
+$dark-text-color: #202124;
+$secondary-text-color: #5f6368;
+$card-bg: #ffffff;
+$border-radius: 8px;
+$border-color: #e0e0e0;
+$font-family-headings: 'Montserrat', 'Arial', sans-serif;
+$font-family-main: 'Roboto', 'Arial', sans-serif;
+$light-text-color:#ffffff;
+$card-shadow: 0 2px 8px rgba(0,0,0,0.07);
+$admin-primary-end:#5f6368;
+.admin-analytics-page {
+  padding: 1.5rem;
+  font-family: $font-family-main;
+
+  .admin-loading-state, .admin-error-state, .no-chart-data {
+    text-align: center;
+    padding: 2rem 1rem;
+    font-size: 1.1rem;
+    color: $secondary-text-color;
+    .spinner-icon {
+      font-size: 1.5rem;
+      color: $admin-primary-accent;
+      margin-right: 0.5rem;
+      animation: spin 1s linear infinite;
+    }
+  }
+  .no-chart-data {
+    min-height: 150px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: lighten($admin-content-bg, 3%);
+    border-radius: $border-radius;
+    font-style: italic;
+  }
+
+
+  .analytics-page-header {
+    margin-bottom: 2rem;
+    h1 {
+      font-family: $font-family-headings;
+      font-size: 1.8rem;
+      color: $dark-text-color;
+      font-weight: 600;
+      margin: 0 0 1.5rem 0;
+    }
+  }
+
+  .filters-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem; // Increased gap
+    align-items: center;
+    margin-bottom: 2rem;
+    padding: 1rem;
+    background-color: $card-bg;
+    border-radius: $border-radius;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+
+    .date-range-filter {
+      display: flex;
+      align-items: center;
+      position: relative;
+      flex-grow: 1;
+      min-width: 280px; // Ensure date picker has enough space
+
+      .filter-icon {
+        position: absolute;
+        left: 0.8rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: $secondary-text-color;
+        opacity: 0.7;
+        z-index: 1;
+      }
+
+      .date-picker-wrapper {
+        width: 100%;
+      }
+      .date-picker-input {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        padding-left: 2.75rem; 
+        font-size: 0.9rem;
+        font-family: $font-family-main;
+        border: 1px solid $border-color;
+        border-radius: 20px; 
+        background-color: lighten($admin-content-bg, 4%);
+        color: $dark-text-color;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+
+        &:focus {
+          outline: none;
+          border-color: $admin-primary-accent;
+          box-shadow: 0 0 0 2px rgba($admin-primary-accent, 0.2);
+        }
+      }
+    }
+    .admin-cta-button.download-csv-button { // Reusing admin-cta-button or define specific
+        background-color: $admin-primary-dark;
+        color: $light-text-color;
+        border: none;
+        padding: 0.75rem 1.2rem;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        font-weight: 500;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        text-decoration: none;
+        transition: background-color 0.2s ease;
+        flex-shrink: 0;
+
+        &:hover {
+            background-color: darken($admin-primary-dark, 10%);
+        }
+        svg { font-size: 1em; }
+    }
+  }
+
+  .summary-stats-section {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2.5rem;
+
+    .stat-card {
+      background-color: $card-bg;
+      padding: 1.5rem;
+      border-radius: $border-radius;
+      box-shadow: $card-shadow;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+
+      .stat-icon {
+        font-size: 3.5rem;
+        padding: 0.8rem;
+        border-radius: 50%;
+        margin-bottom: 0.5rem;
+        color: $light-text-color;
+        &.sales { background-color: $admin-primary-end; }
+        &.orders { background-color: #2196F3; } // Blue
+        &.avg-order { background-color: #4CAF50; } // Green
+      }
+      .stat-value {
+        font-family: $font-family-headings;
+        font-size: 1.8rem;
+        font-weight: 600;
+        color: $dark-text-color;
+      }
+      .stat-label {
+        font-size: 0.9rem;
+        color: $secondary-text-color;
+      }
+    }
+  }
+
+  .charts-section {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2rem;
+
+    @media (min-width: 992px) {
+      grid-template-columns: 1fr 1fr; // Side-by-side charts on desktop
+    }
+
+    .chart-container {
+      background-color: $card-bg;
+      padding: 1.5rem;
+      border-radius: $border-radius;
+      box-shadow: $card-shadow;
+      h3 {
+        font-family: $font-family-headings;
+        font-size: 1.2rem;
+        color: $dark-text-color;
+        margin: 0 0 1.5rem 0;
+        text-align: center;
+      }
+      // Recharts specific overrides if needed
+      .recharts-default-legend {
+        font-size: 0.85rem;
+      }
+      .recharts-cartesian-axis-tick-value {
+        font-size: 0.75rem;
+      }
+    }
+  }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}

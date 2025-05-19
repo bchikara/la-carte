@@ -51,7 +51,7 @@ const Login: React.FC = () => {
             console.log('Sign-in successful. Manual redirect or further actions can be handled here.');
             const from = (location.state as { from?: Location })?.from?.pathname || '/';
             navigate(from)
-            // Example: navigate('/dashboard');
+            // Example: navigate('/');
         } else {
             console.warn('Sign-in success callback, but no Firebase user found in authResult.');
         }

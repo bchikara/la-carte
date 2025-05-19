@@ -21,7 +21,7 @@ const AdminLayout: React.FC = () => {
     const baseAdminPath = `/admin/restaurant/${restaurantId}`;
 
     const sidebarLinks = [
-        { path: `${baseAdminPath}/dashboard`, label: 'Dashboard', icon: <FaTachometerAlt /> },
+        { path: `${baseAdminPath}/`, label: 'Dashboard', icon: <FaTachometerAlt /> },
         { path: `${baseAdminPath}/orders`, label: 'Orders', icon: <FaClipboardList /> },
         { path: `${baseAdminPath}/menu`, label: 'Menu Editor', icon: <FaUtensils /> },
         { path: `${baseAdminPath}/analytics`, label: 'Analytics', icon: <FaChartBar /> },

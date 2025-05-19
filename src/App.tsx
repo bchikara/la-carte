@@ -27,6 +27,10 @@ import AdminRoute from './components/RestaurantRoute/RestaurantRoute';
 import AdminDashboardPage from './pages/Admin/AdminDashboardPage';
 import AdminMenuEditorPage from './pages/MenuEditor/MenuEditor';
 import Confirm from './pages/Confirm/Confirm';
+import AdminOrdersPage from './pages/Admin/AdminOrdersPage';
+import AdminLayout from './components/Admin/AdminLayout';
+import AdminAnalyticsPage from './pages/Admin/AdminAnalyticsPage';
+import AdminRestaurantSettingsPage from './pages/Admin/AdminRestaurantSettingsPage';
 
 function App() {
   // Initialize Firebase auth listener when App mounts
@@ -87,10 +91,15 @@ function App() {
             <Route index element={<Confirm />} />
           </Route>
 
-          <Route path='/admin/restaurant/:restaurantId/dashboard' element={<AdminDashboardPage/>}>
-          </Route>
+          <Route path="/admin/restaurant/:restaurantId" element={<AdminRoute />}>
+            {/* Default route (dashboard) when no sub-path is specified */}
+            <Route index element={<AdminDashboardPage />} />
 
-          <Route path='/admin/restaurant/:restaurantId/menu' element={<AdminMenuEditorPage/>}>
+            {/* Other nested routes */}
+            <Route path="menu" element={<AdminMenuEditorPage />} />
+            <Route path="orders" element={<AdminOrdersPage />} />
+            <Route path="analytics" element={<AdminAnalyticsPage />} />
+            <Route path="settings" element={<AdminRestaurantSettingsPage />} />
           </Route>
 
 

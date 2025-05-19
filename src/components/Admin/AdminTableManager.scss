@@ -1,0 +1,167 @@
+// src/components/Admin/Settings/admin-table-manager.scss
+
+// Assuming admin theme variables are available
+$admin-primary-accent: #ffbc36;
+$dark-text-color: #202124;
+$secondary-text-color: #5f6368;
+$card-bg: #ffffff;
+$border-radius: 8px;
+$border-color: #e0e0e0;
+$danger-color: #d9534f;
+$success-color: #4CAF50;
+$font-family-main: 'Roboto', 'Arial', sans-serif;
+$light-text-color:#ffffff;
+$admin-content-bg: #f4f6f8;
+.admin-table-manager {
+  .table-manager-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+
+    h4 {
+      font-size: 1.2rem;
+      color: $dark-text-color;
+      font-weight: 500;
+      margin: 0;
+    }
+
+    .admin-cta-button.small { // Style for smaller CTA buttons
+      padding: 0.5rem 1rem;
+      font-size: 0.85rem;
+      background-color: $admin-primary-accent; // Assuming primary style
+      color: $light-text-color; // Assuming $light-text-color is defined
+      border: none;
+      border-radius: 20px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: background-color 0.2s ease;
+      &:hover {
+        background-color: darken($admin-primary-accent, 8%);
+      }
+      svg { font-size: 1em; }
+    }
+  }
+
+  .tables-list {
+    display: grid;
+    grid-template-columns: 1fr; // Single column on mobile
+    gap: 1rem;
+
+    @media (min-width: 768px) {
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); // Responsive columns
+    }
+  }
+
+  .table-item-card {
+    background-color: $card-bg;
+    border-radius: $border-radius;
+    padding: 1rem 1.25rem;
+    border: 1px solid $border-color;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    display: flex;
+    flex-direction: column; // Stack info and actions on mobile
+    gap: 0.75rem;
+
+    @media (min-width: 600px) {
+        flex-direction: row; // Side by side on larger screens
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .table-info {
+      display: flex;
+      flex-direction: column; // Stack name, capacity, status
+      gap: 0.25rem;
+      flex-grow: 1;
+      
+      @media (min-width: 600px) {
+        flex-direction: row; // Info items in a row
+        align-items: center;
+        gap: 1rem;
+      }
+
+      .table-name {
+        font-size: 1.05rem;
+        font-weight: 600;
+        color: $dark-text-color;
+      }
+      .table-capacity {
+        font-size: 0.85rem;
+        color: $secondary-text-color;
+      }
+      .table-status {
+        font-size: 0.8rem;
+        font-weight: 500;
+        padding: 0.15rem 0.5rem;
+        border-radius: 10px;
+        display: inline-block; // So padding applies correctly
+        &.active {
+          background-color: lighten($success-color, 40%);
+          color: darken($success-color, 10%);
+        }
+        &.inactive {
+          background-color: lighten($secondary-text-color, 35%);
+          color: darken($secondary-text-color, 10%);
+        }
+      }
+    }
+
+    .table-actions {
+      display: flex;
+      gap: 0.5rem;
+      flex-shrink: 0; // Prevent shrinking
+      
+      // Assuming .admin-icon-button styles are globally available or defined in a shared file
+      // If not, copy from editable-category-section.scss and adjust as needed
+      .admin-icon-button {
+        background-color: transparent;
+        border: 1px solid transparent;
+        color: $secondary-text-color;
+        padding: 0.4rem 0.6rem;
+        border-radius: 15px;
+        font-size: 0.8rem;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+        transition: all 0.2s ease;
+
+        svg { font-size: 0.9em; }
+        span { display: none; @media (min-width: 992px) { display: inline; } } // Show text on larger screens
+        &:hover span { display: inline; }
+
+
+        &.qr-btn:hover { color: #3498db; border-color: #3498db; background-color: lighten(#3498db, 40%);} // Blue for QR
+        &.edit-btn:hover { color: $admin-primary-accent; border-color: $admin-primary-accent; background-color: lighten($admin-primary-accent, 38%);}
+        &.delete-btn:hover { color: $danger-color; border-color: $danger-color; background-color: lighten($danger-color, 35%);}
+      }
+    }
+  }
+  
+  .qr-code-display-section {
+    margin-top: 1rem;
+    padding: 1rem;
+    background-color: lighten($admin-content-bg, 5%);
+    border-radius: $border-radius;
+    border: 1px solid $border-color;
+    display: flex; // To center QRCodeGenerator if it's inline-block
+    justify-content: center;
+    align-items: center;
+    flex-direction: column; // Stack QR and download button
+    gap: 1rem;
+  }
+
+  .no-tables-message {
+    font-size: 0.95rem;
+    color: $secondary-text-color;
+    padding: 2rem 0;
+    text-align: center;
+    font-style: italic;
+    background-color: $card-bg;
+    border-radius: $border-radius;
+    border: 1px dashed $border-color;
+  }
+}

@@ -32,7 +32,6 @@ const OrderSummaryCard: React.FC<OrderSummaryCardProps> = ({ order, restaurantId
   
   const totalItems = Object.values(order.products || {}).reduce((sum, p) => sum + p.quantity, 0);
 
-
   return (
     <div className={`order-summary-card status-${order.status}`}>
       <div className="card-header">

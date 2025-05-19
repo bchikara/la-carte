@@ -1,5 +1,5 @@
 // src/types/restaurant.types.ts
-import { OrderProduct } from './user.types'; // Import OrderProduct if it's the same structure
+import { OrderProduct } from './user.types'; // Assuming OrderProduct is defined in user.types.ts
 
 // --- Raw Firebase Data Structures (for menu processing) ---
 export interface RawProductFirebase {
@@ -27,7 +27,7 @@ export interface RawMenuCategoryFirebase {
 export type RawRestaurantMenuFirebase = Record<string, RawMenuCategoryFirebase>;
 
 // --- Processed Application Data Structures (for UI and app logic) ---
-export interface Product { // This is the processed product for customer-facing menu
+export interface Product { 
   key: string; 
   name: string;
   description?: string;
@@ -37,13 +37,13 @@ export interface Product { // This is the processed product for customer-facing 
   icon?: string; 
   [key: string]: any;
 }
-export interface MenuSubCategoryData { // Processed for UI
+export interface MenuSubCategoryData { 
   key: string; 
   name: string;
   description?: string;
   products: Product[]; 
 }
-export interface MenuCategoryData { // Processed for UI
+export interface MenuCategoryData { 
   key: string; 
   name: string;
   description?: string;
@@ -65,22 +65,17 @@ export interface MenuItem {
   subCategoryName?: string; 
   [key: string]: any;
 }
-// This type is for the data structure of a sub-category when creating/editing it.
-// It might not have products directly if products are managed separately.
 export interface MenuSubCategory { 
   id: string; 
   name: string;
   description?: string;
-  // products?: Record<string, MenuItem>; // Products might be managed via addMenuItem action
   [key: string]: any;
 }
 export interface MenuCategory { 
   id: string; 
   name: string;
   description?: string;
-  // 'subCategories' here refers to the collection of sub-category data under a main category.
-  // The keys are sub-category IDs.
-  subCategories?: Record<string, Omit<MenuSubCategory, 'id'>>; // When creating/updating a main category with its subcategories
+  subCategories?: Record<string, Omit<MenuSubCategory, 'id'>>; 
   [key: string]: any;
 }
 export interface RestaurantMenu { 
@@ -112,6 +107,24 @@ export interface RestaurantTable {
   qrCodeValue?: string; 
   [key: string]: any;
 }
+
+// Define more granular statuses
+export type OrderStatus = 
+  | 'pending'       // Customer placed, awaiting restaurant confirmation
+  | 'confirmed'     // Restaurant confirmed, preparing
+  | 'preparing'     // Food is being prepared
+  | 'ready_for_pickup' // For takeaway
+  | 'out_for_delivery' // For delivery
+  | 'served'        // For dine-in, food served to table
+  | 'completed'     // Order fulfilled (picked up, delivered, or dine-in finished before payment)
+  | 'paid'          // Payment confirmed, order fully closed (often follows completed/served)
+  | 'cancelled_user'// Cancelled by user
+  | 'cancelled_restaurant' // Cancelled by restaurant
+  | 'failed';       // Payment failed or other critical failure
+
+export type PaymentStatus = 'pending' | 'paid' | 'failed' | 'refunded' | 'not_applicable';
+
+
 export interface RestaurantOrder {
   id: string; 
   key?: string; 
@@ -124,8 +137,8 @@ export interface RestaurantOrder {
   products: Record<string, OrderProduct>; 
   totalPrice: number; 
   orderTimestamp: number; 
-  status: 'pending' | 'confirmed' | 'preparing' | 'ready_for_pickup' | 'out_for_delivery' | 'completed' | 'served' | 'paid' | 'cancelled';
-  paymentStatus?: 'pending' | 'paid' | 'refunded';
+  status: OrderStatus; // Use the more granular OrderStatus type
+  paymentStatus?: PaymentStatus;
   paymentId?: string;
   notes?: string;
   tableClearTimestamp?: number; 
@@ -146,7 +159,7 @@ export interface Restaurant {
   cuisineType?: string[];
   operatingHours?: Record<string, string>; 
   ownerId?: string; 
-  imageUrl?: string; 
+  imageUrl?: string | null; 
   isActive?: boolean;
   registered?: boolean; 
   menu?: RawRestaurantMenuFirebase; 
@@ -159,14 +172,7 @@ export interface Restaurant {
 // --- Argument Types for Service Methods (Path Keys) ---
 export interface RestaurantIdParam { id: string; }
 export interface RestaurantMenuCategoryPathKeys extends RestaurantIdParam { menuCategoryId: string; }
-
-// New PathKey for SubCategory operations
-export interface RestaurantMenuSubCategoryPathKeys extends RestaurantMenuCategoryPathKeys {
-  subCategoryId: string;
-}
-
-export interface RestaurantMenuItemPathKeys extends RestaurantMenuSubCategoryPathKeys { // MenuItem is under SubCategory
-  menuItemId: string;       
-}
+export interface RestaurantMenuSubCategoryPathKeys extends RestaurantMenuCategoryPathKeys { subCategoryId: string; }
+export interface RestaurantMenuItemPathKeys extends RestaurantMenuSubCategoryPathKeys { menuItemId: string; }
 export interface RestaurantTablePathKeys extends RestaurantIdParam { tableId: string; }
 export interface RestaurantTableOrderPathKeys extends RestaurantTablePathKeys { orderId: string; }

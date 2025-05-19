@@ -1,0 +1,235 @@
+// src/components/Admin/Orders/admin-order-card.scss
+
+$card-bg: #ffffff;
+$border-color: #e0e0e0;
+$text-color-dark: #202124;
+$text-color-light: #5f6368;
+$primary-accent: #ffbc36;
+$font-family-main: 'Roboto', 'Arial', sans-serif;
+$border-radius: 8px;
+$card-shadow: 0 2px 8px rgba(0,0,0,0.07);
+
+$background-page: #f8f9fa; 
+$light-text-color: #ffffff;
+// Status Colors (can be expanded)
+$status-pending-bg: #fff9c4; $status-pending-text: #f57f17;
+$status-confirmed-bg: #c5cae9; $status-confirmed-text: #283593;
+$status-preparing-bg: #ffe0b2; $status-preparing-text: #e65100;
+$status-served-bg: #c8e6c9; $status-served-text: #1b5e20;
+$status-completed-bg: #a5d6a7; $status-completed-text: #2e7d32;
+$status-paid-bg: #4caf50; $status-paid-text: #ffffff; // More distinct paid color
+$status-cancelled-bg: #ffcdd2; $status-cancelled-text: #c62828;
+$status-ready_for_pickup-bg: #b3e5fc; $status-ready_for_pickup-text: #01579b;
+$status-out_for_delivery-bg: #b3e5fc; $status-out_for_delivery-text: #01579b;
+
+
+.admin-order-card {
+  background-color: $card-bg;
+  border-radius: $border-radius;
+  box-shadow: $card-shadow;
+  margin-bottom: 1.5rem;
+  padding: 1rem 1.25rem;
+  border-left: 5px solid $primary-accent; // Theme accent border
+  transition: box-shadow 0.3s ease;
+
+  &:hover {
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+  }
+
+  // Background tints based on status (optional)
+  // &.status-bg-pending { background-color: lighten($status-pending-bg, 15%); border-left-color: $status-pending-text; }
+  // &.status-bg-confirmed { background-color: lighten($status-confirmed-bg, 10%); border-left-color: $status-confirmed-text; }
+  // ... and so on for other statuses
+
+  .order-card-main-info {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 0.5rem;
+    padding-bottom: 0.75rem;
+    margin-bottom: 0.75rem;
+    border-bottom: 1px dashed $border-color;
+
+    .order-id-type {
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+      .order-id {
+        font-weight: 600;
+        font-size: 1rem;
+        color: $text-color-dark;
+      }
+      .order-type-icon {
+        font-size: 0.85rem;
+        color: $text-color-light;
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+        svg { font-size: 1em; }
+      }
+    }
+    .order-customer {
+        font-size: 0.85rem;
+        color: $text-color-light;
+        p { margin: 0 0 0.1rem 0; strong { color: $text-color-dark; }}
+    }
+    .order-time-details {
+      font-size: 0.8rem;
+      color: $text-color-light;
+      text-align: right;
+    }
+  }
+
+  .order-items-preview {
+    margin-bottom: 0.75rem;
+    font-size: 0.85rem;
+    max-height: 80px; // Show a few items, then scroll if many
+    overflow-y: auto;
+    padding-right: 5px; // For scrollbar
+
+    .item-preview {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.2rem 0;
+      color: $text-color-light;
+      
+      .item-veg-indicator {
+        width: 12px;
+        height: 12px;
+        margin-right: 0.4rem;
+      }
+      span:first-child { // Name x Qty
+        flex-grow: 1;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        margin-right: 0.5rem;
+      }
+      span:last-child { // Price
+        font-weight: 500;
+        color: $text-color-dark;
+      }
+    }
+  }
+
+  .order-totals-row {
+    text-align: right;
+    font-size: 1rem;
+    color: $text-color-dark;
+    margin-bottom: 1rem;
+    padding-top: 0.5rem;
+    border-top: 1px dashed $border-color;
+  }
+
+  .order-status-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid $border-color;
+
+    .status-control-group {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex: 1 1 200px; // Allow wrapping
+
+      label {
+        font-size: 0.8rem;
+        font-weight: 500;
+        color: $text-color-light;
+      }
+
+      select {
+        flex-grow: 1;
+        padding: 0.4rem 0.6rem;
+        border-radius: 4px;
+        border: 1px solid darken($border-color, 10%);
+        font-family: $font-family-main;
+        font-size: 0.85rem;
+        background-color: lighten($background-page, 2%);
+        cursor: pointer;
+
+        &:disabled {
+          opacity: 0.7;
+          cursor: not-allowed;
+        }
+      }
+      // Status specific select styling
+      @each $status, $bg, $text in 
+        (pending, $status-pending-bg, $status-pending-text),
+        (confirmed, $status-confirmed-bg, $status-confirmed-text),
+        (preparing, $status-preparing-bg, $status-preparing-text),
+        (served, $status-served-bg, $status-served-text),
+        (completed, $status-completed-bg, $status-completed-text),
+        (paid, $status-paid-bg, $status-paid-text),
+        (cancelled_user, $status-cancelled-bg, $status-cancelled-text),
+        (cancelled_restaurant, $status-cancelled-bg, $status-cancelled-text),
+        (ready_for_pickup, $status-ready_for_pickup-bg, $status-ready_for_pickup-text),
+        (out_for_delivery, $status-out_for_delivery-bg, $status-out_for_delivery-text),
+        (failed, $status-cancelled-bg, $status-cancelled-text) // Assuming failed uses similar colors to cancelled
+      {
+        .status-select-#{$status} {
+          background-color: $bg;
+          color: $text;
+          font-weight: 500;
+          border-color: darken($bg, 10%);
+        }
+         .payment-select-#{$status} { // For payment status if it uses same names
+            background-color: $bg;
+            color: $text;
+            font-weight: 500;
+            border-color: darken($bg, 10%);
+        }
+      }
+       .payment-select-not_applicable {
+          background-color: #e0e0e0;
+          color: #757575;
+          border-color: #bdbdbd;
+       }
+
+
+      .status-spinner {
+        font-size: 1rem;
+        color: $primary-accent;
+        animation: spin 1s linear infinite;
+      }
+    }
+  }
+
+  .order-card-actions {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap; // Allow buttons to wrap
+    justify-content: flex-end; // Align buttons to the right
+
+    .action-button, .invoice-download-button { // General style for action buttons
+      padding: 0.4rem 0.8rem;
+      font-size: 0.8rem;
+      border-radius: 20px;
+      font-weight: 500;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+      border: 1px solid $primary-accent;
+      background-color: transparent;
+      color: $primary-accent;
+
+      svg { font-size: 0.9em; }
+
+      &:hover {
+        background-color: $primary-accent;
+        color: $light-text-color;
+      }
+    }
+  }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}

@@ -1,0 +1,80 @@
+// src/pages/Admin/admin-restaurant-settings-page.scss
+
+// Assuming admin theme variables are available
+$admin-primary-accent: #ffbc36;
+$admin-content-bg: #f4f6f8;
+$dark-text-color: #202124;
+$secondary-text-color: #5f6368;
+$card-bg: #ffffff;
+$border-radius: 8px;
+$border-color: #e0e0e0;
+$font-family-headings: 'Montserrat', 'Arial', sans-serif;
+$font-family-main: 'Roboto', 'Arial', sans-serif;
+
+.admin-settings-page {
+  padding: 1.5rem; // Padding within the main content area of AdminLayout
+  font-family: $font-family-main;
+
+  .loading-state, .error-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    font-size: 1.1rem;
+    color: $secondary-text-color;
+    .spinner-icon {
+      font-size: 2rem;
+      color: $admin-primary-accent;
+      margin-bottom: 0.5rem;
+      animation: spin 1s linear infinite;
+    }
+  }
+
+  .settings-page-header {
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid $border-color;
+    h1 {
+      font-family: $font-family-headings;
+      font-size: 1.8rem;
+      color: $dark-text-color;
+      font-weight: 600;
+      margin: 0 0 0.25rem 0;
+    }
+    p {
+      font-size: 1rem;
+      color: $secondary-text-color;
+      margin: 0;
+    }
+     @media (min-width: 768px) {
+        h1 { font-size: 2.2rem; }
+    }
+  }
+
+  .settings-sections-container {
+    display: flex;
+    flex-direction: column;
+    gap: 2.5rem; // Space between sections
+  }
+
+  .settings-section {
+    background-color: $card-bg;
+    border-radius: $border-radius;
+    padding: 1.5rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+
+    h2 {
+      font-family: $font-family-headings;
+      font-size: 1.4rem;
+      color: $dark-text-color;
+      font-weight: 500;
+      margin: 0 0 1.5rem 0;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid $border-color;
+    }
+  }
+}
+
+// Spinner animation (if not globally defined)
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}

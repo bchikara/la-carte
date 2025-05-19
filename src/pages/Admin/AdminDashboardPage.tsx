@@ -34,8 +34,9 @@ const AdminDashboardPage: React.FC = () => {
     }, [restaurantId, listenToRestaurantAndMenu, stopListeningToRestaurantDetails]);
 
     const newOrders = useMemo(() => {
+        console.log('all orders',allRestaurantOrders)
         return allRestaurantOrders
-            .filter(order => order.status === 'pending' || order.status === 'confirmed')
+            .filter(order => order.status !== 'served')
             .sort((a, b) => b.orderTimestamp - a.orderTimestamp);
     }, [allRestaurantOrders]);
 

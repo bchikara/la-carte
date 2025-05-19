@@ -1,0 +1,69 @@
+// src/components/Admin/Settings/qr-code-generator.scss
+
+// Assuming admin theme variables are available
+$admin-primary-accent: #ffbc36;
+$secondary-text-color: #5f6368;
+$border-color: #e0e0e0;
+$font-family-main: 'Roboto', 'Arial', sans-serif;
+
+$dark-text-color: #202124;
+$light-text-color:#ffffff;
+$background-page: #f8f9fa; 
+.qr-code-generator-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem; // Space between QR code and button
+  padding: 1rem;
+  background-color: #fff; // White background for the QR code area
+  border-radius: 8px;
+  border: 1px solid $border-color;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+  width: fit-content; // Fit to content size
+  margin: 0 auto; // Center if used in a wider container
+}
+
+.qr-code-canvas-wrapper {
+  // The QRCodeCanvas component renders a <canvas> element.
+  // Its size is controlled by the `size` prop passed to it.
+  // This wrapper can be used for additional styling like borders if needed.
+  padding: 10px; // Padding around the QR code itself
+  background-color: #fff; // Ensure background is white for QR readability
+  border-radius: 4px; // Slightly rounded corners for the immediate QR area
+  box-shadow: inset 0 0 5px rgba(0,0,0,0.05);
+
+  canvas {
+    display: block; // Remove any extra space below canvas
+  }
+}
+
+.download-qr-button {
+  // Assuming .admin-cta-button, .tertiary, .small styles are globally available
+  // or define them here if not.
+  // Example specific override or definition:
+  &.admin-cta-button.tertiary.small {
+    background-color: transparent;
+    color: $secondary-text-color;
+    border: 1px solid $border-color;
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+    font-family: $font-family-main;
+    border-radius: 20px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    transition: all 0.2s ease;
+
+    svg {
+      font-size: 0.9em;
+    }
+
+    &:hover {
+      background-color: darken($background-page, 3%); // Assuming $background-page
+      border-color: darken($border-color, 10%);
+      color: $dark-text-color; // Assuming $dark-text-color
+    }
+  }
+}

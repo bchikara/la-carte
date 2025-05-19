@@ -15,15 +15,20 @@ import {
   RestaurantMenuItemPathKeys,
   RestaurantTablePathKeys,
   RestaurantTableOrderPathKeys,
+  PaymentStatus,
+  RestaurantTable,
 } from '../types/restaurant.types'; // Adjust path as needed
 
 const RESTAURANTS_PATH = "/restaurants";
+const RESTAURANT_IMAGES_PATH = "restaurantImages";
 
 class RestaurantDataService {
   private db: firebase.database.Reference;
+  private storageRef: firebase.storage.Reference;
 
   constructor() {
     this.db = database.ref(RESTAURANTS_PATH);
+    this.storageRef = storage.ref();
   }
 
   getAll(): firebase.database.Reference {
@@ -172,6 +177,38 @@ class RestaurantDataService {
       .remove();
   }
 
+   // --- Table Management Methods ---
+  addRestaurantTable(restaurantId: string, tableData: Omit<RestaurantTable, 'id'>): Promise<firebase.database.Reference> {
+    // If table ID is user-defined and should be the key:
+    // if (!tableData.name) throw new Error("Table name is required to generate ID.");
+    // const tableId = tableData.name.replace(/\s+/g, '-').toLowerCase(); // Example ID generation
+    // return this.db.child(restaurantId).child('tables').child(tableId).set({...tableData, id: tableId}).then(() => this.db.child(restaurantId).child('tables').child(tableId));
+    // If using Firebase push keys for table IDs:
+    const newTableRef = this.db.child(restaurantId).child('tables').push();
+    const tableId = newTableRef.key;
+    if (!tableId) throw new Error("Failed to generate table ID.");
+    return newTableRef.set({ ...tableData, id: tableId }).then(() => newTableRef);
+  }
+
+  async uploadRestaurantImage(restaurantId: string, file: File): Promise<string> {
+    try {
+        const fileRef = this.storageRef.child(`${RESTAURANT_IMAGES_PATH}/${restaurantId}/${file.name}_${Date.now()}`);
+        const snapshot = await fileRef.put(file);
+        return snapshot.ref.getDownloadURL();
+    } catch (error) {
+        console.error("Error uploading restaurant image:", error);
+        throw error;
+    }
+  }
+
+  updateRestaurantTable(restaurantId: string, tableId: string, tableData: Partial<RestaurantTable>): Promise<void> {
+    return this.db.child(restaurantId).child('tables').child(tableId).update(tableData);
+  }
+
+  deleteRestaurantTable(restaurantId: string, tableId: string): Promise<void> {
+    return this.db.child(restaurantId).child('tables').child(tableId).remove();
+  }
+
   // --- Table Order Methods & Restaurant Order Methods (as before) ---
   addOrderToTable(keys: RestaurantTablePathKeys, value: Omit<TableOrder, 'id'>): Promise<firebase.database.Reference> {
     const newRef = this.db.child(keys.id).child('tables').child(keys.tableId).child('orders').push();
@@ -195,6 +232,9 @@ class RestaurantDataService {
   }
   updateOrderStatus(restaurantId: string, orderId: string, newStatus: RestaurantOrder['status']): Promise<void> {
     return this.db.child(restaurantId).child('orders').child(orderId).child('status').set(newStatus);
+  }
+  updateOrderPaymentStatus(restaurantId: string, orderId: string, newPaymentStatus: PaymentStatus): Promise<void> {
+    return this.db.child(restaurantId).child('orders').child(orderId).child('paymentStatus').set(newPaymentStatus);
   }
   getOrdersFromRestaurant( 
     keys: RestaurantIdParam,

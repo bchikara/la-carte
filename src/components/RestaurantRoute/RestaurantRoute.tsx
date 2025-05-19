@@ -32,7 +32,7 @@ const AdminRoute: React.FC = () => {
   // and they have a restaurantId, redirect them to their specific restaurant dashboard.
   // This handles cases like a generic /admin route.
   if (!routeRestaurantId && currentUser.restaurantId) {
-    return <Navigate to={`/admin/restaurant/${currentUser.restaurantId}/dashboard`} replace />;
+    return <Navigate to={`/admin/restaurant/${currentUser.restaurantId}/`} replace />;
   }
   
   // If user is admin and (routeRestaurantId matches OR no routeRestaurantId and no user.restaurantId (edge case for super admin?))

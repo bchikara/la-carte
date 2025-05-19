@@ -20,6 +20,9 @@ import type {
   RestaurantTablePathKeys,
   RestaurantTableOrderPathKeys,
   RestaurantMenuSubCategoryPathKeys,
+  PaymentStatus,
+  RestaurantTable,
+  Product,
 } from '../types/restaurant.types'; // Adjust path
 import firebase from 'firebase/compat/app'; 
 
@@ -32,7 +35,7 @@ interface RestaurantActiveListeners {
 }
 
 // --- Types for Menu Editing State ---
-export type EditingItemType = 'category' | 'subCategory' | 'product' | null;
+export type EditingItemType = 'category' | 'subCategory' | 'product' | 'table' | null;
 
 export interface MenuEditingParentContext {
     restaurantId?: string; // Added restaurantId
@@ -41,11 +44,12 @@ export interface MenuEditingParentContext {
 }
 
 export interface MenuEditingState {
+  isTableModalOpen: boolean;
   isProductModalOpen: boolean;
-  isCategoryModalOpen: boolean; 
-  editingItem: MenuProductType | MenuCategoryData | MenuSubCategoryData | null;
+  isCategoryModalOpen: boolean;
+  editingItem: Product | MenuSubCategoryData | MenuCategoryData | RestaurantTable | null;
   editingItemType: EditingItemType;
-  parentContext?: MenuEditingParentContext; // Use the updated context type
+  parentContext?: MenuEditingParentContext;
 }
 
 // --- Store State and Actions ---
@@ -99,8 +103,18 @@ export interface AppRestaurantStoreActions {
   listenToAllRestaurantOrders: (restaurantId: string) => void; 
   stopListeningToAllRestaurantOrders: (restaurantId: string) => void; 
   updateRestaurantOrderStatus: (restaurantId: string, orderId: string, newStatus: RestaurantOrder['status']) => Promise<void>; 
-  
+  updateRestaurantOrderPaymentStatus: (restaurantId: string, orderId: string, paymentStatus: PaymentStatus) => Promise<void>;
   // Updated signature for openProductModal context
+  updateRestaurantDetails: (
+        restaurantId: string, 
+        details: Partial<Omit<Restaurant, 'id'|'key'|'menu'|'orders'|'tables'|'staff'>>, // Fields that can be directly updated
+        imageFile?: File | null
+  ) => Promise<void>;
+  addRestaurantTable: (restaurantId: string, tableData: Omit<RestaurantTable, 'id' | 'qrCodeValue'>) => Promise<string | null>;
+  updateRestaurantTable: (restaurantId: string, tableId: string, tableData: Partial<RestaurantTable>) => Promise<void>;
+  deleteRestaurantTable: (restaurantId: string, tableId: string) => Promise<void>;
+  openTableModal: (table?: RestaurantTable) => void; // For table modal
+  closeTableModal: () => void;
   openProductModal: (product?: MenuProductType, context?: MenuEditingParentContext) => void;
   closeProductModal: () => void;
   openCategoryModal: (
@@ -132,12 +146,13 @@ const initialRestaurantState: AppRestaurantStoreState = {
   errorTableOrders: null,
   errorAllOrders: null,         
   activeListeners: {},
-  menuEditing: { 
+  menuEditing: {
     isProductModalOpen: false,
     isCategoryModalOpen: false,
     editingItem: null,
     editingItemType: null,
-    parentContext: {}, // Initialize with an empty object or specific defaults
+    parentContext: {},
+    isTableModalOpen: false
   },
 };
 
@@ -208,6 +223,9 @@ export const useRestaurantStore = create<AppRestaurantStore>((set, get) => ({
   closeCategoryModal: () => set(state => ({
     menuEditing: { ...state.menuEditing, isCategoryModalOpen: false, editingItem: null, editingItemType: null, parentContext: {} }
   })),
+  openTableModal: (table) => set(state => ({menuEditing: {...state.menuEditing, isTableModalOpen: true, editingItem: table || null, editingItemType: 'table' }})),
+  closeTableModal: () => set(state => ({menuEditing: {...state.menuEditing, isTableModalOpen: false, editingItem: null, editingItemType: null }})),
+
 
   // --- Existing Actions (ensure they are complete and correct) ---
   listenToAllRestaurants: () => {
@@ -320,6 +338,22 @@ export const useRestaurantStore = create<AppRestaurantStore>((set, get) => ({
         }));
     } catch (errorObject: any) {
         set({ errorAllOrders: errorObject.message || "Failed to update status.", isLoadingAllOrders: false });
+    }
+  },
+  updateRestaurantOrderPaymentStatus: async (restaurantId: string, orderId: string, newPaymentStatus: PaymentStatus) => {
+    set({ isLoadingAllOrders: true }); // Or a more specific loading state for payment update
+    try {
+        await restaurantService.updateOrderPaymentStatus(restaurantId, orderId, newPaymentStatus);
+        // Listener should pick up the change, or update optimistically:
+        set(state => ({
+            allRestaurantOrders: state.allRestaurantOrders.map(order =>
+                order.id === orderId ? { ...order, paymentStatus: newPaymentStatus } : order
+            ),
+            isLoadingAllOrders: false
+        }));
+    } catch (errorObject: any) {
+        console.error(`Error updating payment status for order ${orderId}:`, errorObject);
+        set({ errorAllOrders: errorObject.message || "Failed to update payment status.", isLoadingAllOrders: false });
     }
   },
   clearError: () => { 
@@ -464,6 +498,58 @@ export const useRestaurantStore = create<AppRestaurantStore>((set, get) => ({
         set({ isLoadingMenu: false });
     } catch(e: any) {
         set({ errorMenu: e.message, isLoadingMenu: false });
+    }
+  },
+    updateRestaurantDetails: async (restaurantId, details, imageFile) => {
+    set({ isLoadingDetails: true, error: null });
+    try {
+        let imageUrl = get().currentRestaurant?.imageUrl || null; // Keep existing if no new file
+        if (imageFile) {
+            imageUrl = await restaurantService.uploadRestaurantImage(restaurantId, imageFile);
+        }
+        const dataToUpdate: Partial<Restaurant> = { ...details };
+        if (imageUrl !== undefined) { // Only update if imageUrl changed or was set
+            dataToUpdate.imageUrl = imageUrl;
+        }
+        await restaurantService.update(restaurantId, dataToUpdate);
+        // The listener on restaurantDetailsAndMenu should refresh currentRestaurant
+        set({ isLoadingDetails: false });
+    } catch (e: any) {
+        set({ error: e.message || "Failed to update restaurant details", isLoadingDetails: false });
+    }
+  },
+  addRestaurantTable: async (restaurantId, tableData) => {
+    if(!get().currentRestaurant || get().currentRestaurant?.id !== restaurantId) {
+        set({error: "Restaurant context error for adding table."});
+        return null;
+    }
+    set({ isLoadingDetails: true }); // Use general details loader or a specific one for tables
+    try {
+        const tableRef = await restaurantService.addRestaurantTable(restaurantId, tableData);
+        // Listener on restaurantDetailsAndMenu should refresh the currentRestaurant.tables
+        set({ isLoadingDetails: false });
+        return tableRef.key;
+    } catch (e: any) {
+        set({ error: e.message || "Failed to add table.", isLoadingDetails: false });
+        return null;
+    }
+  },
+  updateRestaurantTable: async (restaurantId, tableId, tableData) => {
+    set({ isLoadingDetails: true });
+    try {
+        await restaurantService.updateRestaurantTable(restaurantId, tableId, tableData);
+        set({ isLoadingDetails: false });
+    } catch (e: any) {
+        set({ error: e.message || "Failed to update table.", isLoadingDetails: false });
+    }
+  },
+  deleteRestaurantTable: async (restaurantId, tableId) => {
+    set({ isLoadingDetails: true });
+    try {
+        await restaurantService.deleteRestaurantTable(restaurantId, tableId);
+        set({ isLoadingDetails: false });
+    } catch (e: any) {
+        set({ error: e.message || "Failed to delete table.", isLoadingDetails: false });
     }
   },
 

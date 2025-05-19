@@ -1,0 +1,135 @@
+// src/pages/Admin/admin-orders-page.scss
+
+// Assuming admin theme variables are available
+$admin-primary-accent: #ffbc36;
+$admin-content-bg: #f4f6f8;
+$dark-text-color: #202124;
+$secondary-text-color: #5f6368;
+$card-bg: #ffffff;
+$border-radius: 8px;
+$border-color: #e0e0e0;
+$font-family-headings: 'Montserrat', 'Arial', sans-serif;
+$font-family-main: 'Roboto', 'Arial', sans-serif;
+
+$light-text-color: #ffffff;
+.admin-orders-page {
+  padding: 1.5rem; // Padding within the main content area of AdminLayout
+  font-family: $font-family-main;
+
+  .admin-loading-state, .admin-error-state, .no-orders-found, .loading-inline {
+    text-align: center;
+    padding: 2rem 1rem;
+    font-size: 1.1rem;
+    color: $secondary-text-color;
+    .spinner-icon {
+      font-size: 1.5rem;
+      color: $admin-primary-accent;
+      margin-right: 0.5rem;
+      animation: spin 1s linear infinite;
+    }
+  }
+  .loading-inline {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+  }
+
+  .orders-page-header {
+    margin-bottom: 2rem;
+    h1 {
+      font-family: $font-family-headings;
+      font-size: 1.8rem;
+      color: $dark-text-color;
+      font-weight: 600;
+      margin: 0 0 1.5rem 0; // Increased bottom margin
+    }
+  }
+
+  .filters-and-actions {
+    display: flex;
+    flex-wrap: wrap; // Allow items to wrap on smaller screens
+    gap: 1rem;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background-color: $card-bg;
+    border-radius: $border-radius;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+
+    .search-orders-filter, .date-range-filter {
+      display: flex;
+      align-items: center;
+      position: relative;
+      flex-grow: 1; // Allow search and date to take space
+      min-width: 250px; // Minimum width before wrapping
+
+      .search-icon, .date-icon {
+        position: absolute;
+        left: 0.8rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: $secondary-text-color;
+        opacity: 0.7;
+      }
+
+      input[type="text"], .date-picker-input {
+        width: 100%;
+        padding: 0.7rem 0.8rem;
+        padding-left: 2.5rem; // Space for icon
+        font-size: 0.9rem;
+        font-family: $font-family-main;
+        border: 1px solid $border-color;
+        border-radius: 20px; // Pill shape
+        background-color: lighten($admin-content-bg, 3%);
+        color: $dark-text-color;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+
+        &:focus {
+          outline: none;
+          border-color: $admin-primary-accent;
+          box-shadow: 0 0 0 2px rgba($admin-primary-accent, 0.2);
+        }
+      }
+      .react-datepicker-wrapper { // Target the wrapper for DatePicker
+          width: 100%;
+      }
+    }
+    .download-csv-button { // Reusing .admin-cta-button or define specific style
+        background-color: $secondary-text-color;
+        color: $light-text-color;
+        border: none;
+        padding: 0.7rem 1rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 500;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        text-decoration: none;
+        transition: background-color 0.2s ease;
+        flex-shrink: 0; // Prevent shrinking when space is tight
+
+        &:hover {
+            background-color: darken($secondary-text-color, 10%);
+        }
+        svg { font-size: 1em; }
+    }
+  }
+
+  .orders-list-section {
+    .admin-orders-grid {
+      display: grid;
+      // Using auto-fit to create responsive columns for order cards
+      grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr));
+      gap: 1.5rem;
+    }
+  }
+}
+
+// Spinner animation (if not globally defined)
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
