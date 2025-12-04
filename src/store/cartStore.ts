@@ -33,19 +33,31 @@ export const useCartStore = create<CartStore>((set, get) => ({
     });
   },
 
-  addToCart: (product: Product) => { // Takes a full Product object
+  addToCart: (product: Product, restaurantId: string) => { // Takes a full Product object and restaurantId
     // Prevent adding if product is out of stock
     if (product.outofstock) {
         console.warn("Attempted to add out of stock item:", product.name);
         // Optionally, use a snackbar to inform the user:
         // useSnackbarStore.getState().showSnackbar(`${product.name} is out of stock.`, 'warning');
-        return; 
+        return;
     }
 
     set((state) => {
-      const currentCart = { ...state.cart };
+      let currentCart = { ...state.cart };
+
+      // Check if cart has items from a different restaurant
+      const cartItems = Object.values(currentCart);
+      if (cartItems.length > 0) {
+        const existingRestaurantId = cartItems[0].restaurantId;
+        if (existingRestaurantId !== restaurantId) {
+          // Clear cart if switching to a different restaurant
+          console.log(`Switching from restaurant ${existingRestaurantId} to ${restaurantId}. Clearing cart.`);
+          currentCart = {}; // Clear the cart
+        }
+      }
+
       const existingItem = currentCart[product.key]; // Use product.key as the identifier
-      
+
       if (existingItem) {
         // Item already in cart, increment quantity
         currentCart[product.key] = {
@@ -60,11 +72,12 @@ export const useCartStore = create<CartStore>((set, get) => ({
           name: product.name,
           price: product.price,
           icon: product.icon, // Optional: include product icon
+          restaurantId: restaurantId, // Store restaurant ID
           // veg: product.veg, // Optional: include veg status if needed in cart display
           quantity: 1,
         };
       }
-      cartService.saveCartToLocalStorage(currentCart); 
+      cartService.saveCartToLocalStorage(currentCart);
       return {
         cart: currentCart,
         totalItems: calculateTotalItems(currentCart),

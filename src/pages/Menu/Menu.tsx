@@ -161,9 +161,9 @@ const Menu: React.FC = () => {
 
             <main className="menu-content-area">
                 {isSearchActive ? (
-                    <FlatProductList products={filteredProductsForList} searchTerm={debouncedSearchTerm} />
+                    <FlatProductList products={filteredProductsForList} searchTerm={debouncedSearchTerm} restaurantId={restaurantId || ''} />
                 ) : (
-                    currentRestaurantMenu && <MenuAccordion categories={currentRestaurantMenu} />
+                    currentRestaurantMenu && <MenuAccordion categories={currentRestaurantMenu} restaurantId={restaurantId || ''} />
                 )}
             </main>
 

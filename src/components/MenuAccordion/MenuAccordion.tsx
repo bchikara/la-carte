@@ -7,9 +7,10 @@ import './MenuAccordion.scss';
 
 interface MenuAccordionProps {
   categories: MenuCategoryData[];
+  restaurantId: string;
 }
 
-const CategorySection: React.FC<{ category: MenuCategoryData }> = ({ category }) => {
+const CategorySection: React.FC<{ category: MenuCategoryData; restaurantId: string }> = ({ category, restaurantId }) => {
   const [isCategoryOpen, setIsCategoryOpen] = useState(true); // Default open
 
   return (
@@ -31,14 +32,14 @@ const CategorySection: React.FC<{ category: MenuCategoryData }> = ({ category })
         aria-labelledby={`category-header-${category.key}`}
       >
         {category.subCategories.map(subCategory => (
-          <SubCategorySection key={subCategory.key} subCategory={subCategory} />
+          <SubCategorySection key={subCategory.key} subCategory={subCategory} restaurantId={restaurantId} />
         ))}
       </div>
     </div>
   );
 };
 
-const SubCategorySection: React.FC<{ subCategory: MenuSubCategoryData }> = ({ subCategory }) => {
+const SubCategorySection: React.FC<{ subCategory: MenuSubCategoryData; restaurantId: string }> = ({ subCategory, restaurantId }) => {
   const [isSubCategoryOpen, setIsSubCategoryOpen] = useState(true); // Default open
 
   // If subcategory name is empty or just "default", don't render its header, just products
@@ -65,7 +66,7 @@ const SubCategorySection: React.FC<{ subCategory: MenuSubCategoryData }> = ({ su
       >
         <div className="products-grid">
           {subCategory.products.map(product => (
-            <ProductCard key={product.key} product={product} />
+            <ProductCard key={product.key} product={product} restaurantId={restaurantId} />
           ))}
         </div>
       </div>
@@ -74,7 +75,7 @@ const SubCategorySection: React.FC<{ subCategory: MenuSubCategoryData }> = ({ su
 };
 
 
-const MenuAccordion: React.FC<MenuAccordionProps> = ({ categories }) => {
+const MenuAccordion: React.FC<MenuAccordionProps> = ({ categories, restaurantId }) => {
   if (!categories || categories.length === 0) {
     return <p className="no-menu-items">No menu items available at the moment.</p>;
   }
@@ -82,7 +83,7 @@ const MenuAccordion: React.FC<MenuAccordionProps> = ({ categories }) => {
   return (
     <div className="menu-accordion-view">
       {categories.map(category => (
-        <CategorySection key={category.key} category={category} />
+        <CategorySection key={category.key} category={category} restaurantId={restaurantId} />
       ))}
     </div>
   );

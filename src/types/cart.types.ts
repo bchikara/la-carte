@@ -11,9 +11,10 @@ export interface CartItem {
   name: string;
   price: number;
   icon?: string; // Optional product image URL
+  restaurantId: string; // Track which restaurant this item belongs to
   // Add any other properties from Product that you want to store directly in the cart item
   // For example, if 'veg' status is important for display in cart:
-  // veg?: boolean; 
+  // veg?: boolean;
   quantity: number;
 }
 
@@ -39,11 +40,11 @@ export interface CartStoreState {
  * The item passed to addToCart will be the Product object.
  */
 export interface CartStoreActions {
-  initializeCart: () => void; 
-  addToCart: (product: Product) => void; // Takes a Product object
+  initializeCart: () => void;
+  addToCart: (product: Product, restaurantId: string) => void; // Takes a Product object and restaurantId
   removeFromCart: (productKey: string) => void; // Removes one instance, or item if quantity becomes 0
-  getCartItemQuantity: (productKey: string) => number; 
-  isCartEmpty: () => boolean; 
+  getCartItemQuantity: (productKey: string) => number;
+  isCartEmpty: () => boolean;
   deleteCartItem: (productKey: string) => void; // Removes item entirely regardless of quantity
   clearCart: () => void;
   getCartTotalAmount: () => number; // Calculates total price of items in cart

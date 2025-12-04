@@ -7,9 +7,10 @@ import './FlatProductList.scss';
 interface FlatProductListProps {
   products: Product[];
   searchTerm: string;
+  restaurantId: string;
 }
 
-const FlatProductList: React.FC<FlatProductListProps> = ({ products, searchTerm }) => {
+const FlatProductList: React.FC<FlatProductListProps> = ({ products, searchTerm, restaurantId }) => {
   if (products.length === 0 && searchTerm) {
     return <p className="no-search-results">No items found for "{searchTerm}". Try a different search!</p>;
   }
@@ -22,7 +23,7 @@ const FlatProductList: React.FC<FlatProductListProps> = ({ products, searchTerm 
       {searchTerm && <h2 className="search-results-title">Search Results for "{searchTerm}"</h2>}
       <div className="products-grid">
         {products.map(product => (
-          <ProductCard key={product.key} product={product} />
+          <ProductCard key={product.key} product={product} restaurantId={restaurantId} />
         ))}
       </div>
     </div>

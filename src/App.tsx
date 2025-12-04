@@ -67,12 +67,11 @@ function App() {
           </Route>
 
           {/* Protected Routes */}
-          <Route path="/scanner" element={<ProtectedRoute />}>
-            <Route index element={<Scanner />} />
-          </Route>
-          <Route path="/menu/:id" element={<ProtectedRoute />}>
-            <Route index element={<Menu />} />
-          </Route>
+          {/* Scanner is public - no login required to scan QR codes */}
+          <Route path="/scanner" element={<Scanner />} />
+          {/* Menu is public - no login required to browse */}
+          <Route path="/menu/:id" element={<Menu />} />
+
           <Route path="/cart/:id" element={<ProtectedRoute />}>
             <Route index element={<Cart />} />
           </Route>

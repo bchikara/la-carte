@@ -330,3 +330,52 @@ $card-shadow-hover: 0 5px 15px rgba(0,0,0,0.1), 0 3px 8px rgba(0,0,0,0.06);
     }
   }
 }
+// View Toggle Styles
+.view-toggle-container {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin: 2rem 0;
+
+    .view-toggle-btn {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.5rem;
+        background: white;
+        border: 2px solid #e0e0e0;
+        border-radius: 50px;
+        font-weight: 600;
+        color: #666;
+        cursor: pointer;
+        transition: all 0.3s ease;
+
+        svg {
+            font-size: 1rem;
+        }
+
+        &:hover {
+            border-color: #ffbc36;
+            color: #e08f00;
+            transform: translateY(-2px);
+        }
+
+        &.active {
+            background: linear-gradient(98.81deg, #ffbc36 -0.82%, #e08f00 101.53%);
+            border-color: #e08f00;
+            color: white;
+            box-shadow: 0 4px 12px rgba(224, 143, 0, 0.3);
+        }
+    }
+}
+
+@media (max-width: 768px) {
+    .view-toggle-container {
+        gap: 0.5rem;
+
+        .view-toggle-btn {
+            padding: 0.6rem 1rem;
+            font-size: 0.9rem;
+        }
+    }
+}

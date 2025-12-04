@@ -1,15 +1,31 @@
 // src/pages/Homepage/Homepage.tsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Explore.scss';
 import Logo from '../../assets/icons/logo.png';
 import ScanIcon from '../../assets/icons/scan.png'; // Your existing ScanIcon
 import RestaurantList from '../../components/RestaurantList/RestaurantList'; // Adjust path
-import { FaShoppingBag, FaStar, FaCalendarAlt, FaCommentDots } from 'react-icons/fa';
+import RestaurantMap from '../../components/GoogleMap/RestaurantMap';
+import { useRestaurantStore } from '../../store/restaurantStore';
+import { FaShoppingBag, FaStar, FaCalendarAlt, FaCommentDots, FaList, FaMap } from 'react-icons/fa';
 
 const Explore: React.FC = () => {
     const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState<'scan' | 'takeaway'>('scan');
+    const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
+    const { restaurantsList, listenToAllRestaurants, stopListeningToAllRestaurants } = useRestaurantStore();
+
+    // Start listening to restaurants when takeaway tab is active
+    useEffect(() => {
+        if (activeTab === 'takeaway') {
+            listenToAllRestaurants();
+        }
+        return () => {
+            if (activeTab === 'takeaway') {
+                stopListeningToAllRestaurants();
+            }
+        };
+    }, [activeTab, listenToAllRestaurants, stopListeningToAllRestaurants]);
 
     const handleTabSwitch = (tab: 'scan' | 'takeaway') => {
         setActiveTab(tab);
@@ -75,7 +91,28 @@ const Explore: React.FC = () => {
                         <div className="takeaway-tab-content animated-tab">
                              <h2 className="takeaway-tab-title">Your Next Meal, Delivered or Ready for Pickup!</h2>
                              <p className="takeaway-tab-description">Browse local favorites, discover new tastes, and order with ease.</p>
-                            <RestaurantList />
+
+                             {/* Map/List View Toggle */}
+                             <div className="view-toggle-container">
+                                 <button
+                                     className={`view-toggle-btn ${viewMode === 'list' ? 'active' : ''}`}
+                                     onClick={() => setViewMode('list')}
+                                 >
+                                     <FaList /> List View
+                                 </button>
+                                 <button
+                                     className={`view-toggle-btn ${viewMode === 'map' ? 'active' : ''}`}
+                                     onClick={() => setViewMode('map')}
+                                 >
+                                     <FaMap /> Map View
+                                 </button>
+                             </div>
+
+                             {viewMode === 'list' ? (
+                                 <RestaurantList />
+                             ) : (
+                                 <RestaurantMap restaurants={restaurantsList} />
+                             )}
                         </div>
                     )}
                 </main>

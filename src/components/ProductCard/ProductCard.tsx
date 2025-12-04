@@ -9,17 +9,12 @@ import { FaBookmark, FaRegBookmark, FaShareAlt } from 'react-icons/fa';
 
 interface ProductCardProps {
   product: Product;
-}
-
-// Using react-icons for bookmark and share as placeholders
-
-interface ProductCardProps {
-  product: Product;
+  restaurantId: string; // Add restaurantId prop
   // Optional: callback for when "read more" is clicked, if needed for analytics etc.
   // onReadMoreClick?: (productId: string) => void;
 }
 
-const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
+const ProductCard: React.FC<ProductCardProps> = ({ product, restaurantId }) => {
   const { addToCart, removeFromCart, getCartItemQuantity } = useCartStore();
   const quantityInCart = getCartItemQuantity(product.key);
 
@@ -33,7 +28,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.stopPropagation();
-    addToCart({ ...product, quantity: 1 });
+    addToCart(product, restaurantId);
   };
 
   const handleRemoveFromCart = (e: React.MouseEvent) => {

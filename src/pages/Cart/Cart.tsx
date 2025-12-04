@@ -84,14 +84,14 @@ const Cart: React.FC = () => {
 
 
     const handleQuantityChange = (item: CartItem, type: 'add' | 'remove') => {
-        const productDataForStore = { 
-            key: item.productKey, 
-            name: item.name, 
-            price: item.price, 
+        const productDataForStore = {
+            key: item.productKey,
+            name: item.name,
+            price: item.price,
             icon: item.icon,
         };
         if (type === 'add') {
-            addToCartStore(productDataForStore as any); 
+            addToCartStore(productDataForStore as any, restaurantId || item.restaurantId);
         } else {
             removeFromCartStore(item.productKey);
         }
